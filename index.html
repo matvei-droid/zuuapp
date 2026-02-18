@@ -2,64 +2,252 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zuu VPN Cabinet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zuu VPN Profile</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; margin: 0; padding: 20px; }
-        .card { background: #1e293b; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px; }
-        .status-badge { background: #22c55e; color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; float: right; }
-        .user-id { color: #94a3b8; font-size: 14px; }
-        .balance { font-size: 32px; font-weight: bold; margin: 15px 0; color: #38bdf8; }
-        .info-row { display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px; }
-        .info-item { text-align: center; flex: 1; }
-        .info-label { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 5px; }
-        .info-value { font-weight: bold; font-size: 14px; }
-        .progress-container { margin-top: 20px; }
-        .progress-bar { background: #334155; height: 10px; border-radius: 5px; overflow: hidden; }
-        .progress-fill { background: #38bdf8; width: 15%; height: 100%; }
-        .btn { background: #38bdf8; color: #0f172a; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #ffffff;
+            --text-sub: #94a3b8;
+            --accent: #38bdf8;
+            --danger: #f43f5e;
+            --success: #10b981;
+        }
+
+        .light-theme {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --accent: #0ea5e9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px;
+            transition: 0.3s;
+            user-select: none;
+        }
+
+        /* Шапка */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* Карточка профиля */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--success);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .user-id { font-size: 14px; color: var(--text-sub); }
+        .balance { font-size: 32px; font-weight: 800; margin: 10px 0; color: var(--accent); }
+
+        /* Прогресс-бар трафика */
+        .stats-row { display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px; }
+        .progress-container {
+            background: rgba(148, 163, 184, 0.2);
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, var(--accent), #818cf8);
+            width: 75%; height: 100%; border-radius: 4px;
+        }
+
+        /* Сетка инфо */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        .info-box i { color: var(--accent); margin-bottom: 8px; font-size: 20px; }
+        .info-box div:last-child { font-weight: bold; margin-top: 4px; }
+
+        /* Рулетка */
+        .wheel-section {
+            text-align: center;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+        #spin-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            width: 100%;
+            font-size: 16px;
+        }
+        #spin-btn:disabled { background: var(--text-sub); opacity: 0.6; }
+
+        .footer-text {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <span class="status-badge" id="status">Активна</span>
-        <div class="user-id">ID: <span id="uid">000000</span></div>
-        <div class="balance"><span id="bal">0</span> ₽</div>
-        
-        <div class="progress-container">
-            <span class="info-label">Трафик: <span style="float:right">∞ / ∞ ГБ</span></span>
-            <div class="progress-bar"><div class="progress-fill"></div></div>
-        </div>
 
-        <div class="info-row">
-            <div class="info-item">
-                <span class="info-label">Истекает</span>
-                <span class="info-value" id="exp">Нет</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Устройств</span>
-                <span class="info-value">Без лимита</span>
-            </div>
+    <div class="header">
+        <div>
+            <div style="font-weight: bold; font-size: 20px;">Zuu VPN <span style="color:var(--accent)">Premium</span></div>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="status-badge" id="sub-status">Активен</div>
+        <div class="user-id">ID: <span id="user-id-val">000000</span></div>
+        <div class="balance"><span id="balance-val">0</span> ₽</div>
+        
+        <div class="stats-row">
+            <span>Трафик (Безлимит)</span>
+            <span>∞ ГБ</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
         </div>
     </div>
 
-    <button class="btn" onclick="tg.close()">Вернуться в чат</button>
+    <div class="info-grid">
+        <div class="info-box">
+            <i class="fas fa-calendar-alt"></i>
+            <div style="font-size: 12px; color: var(--text-sub);">Истекает</div>
+            <div id="expires-val">--.--.----</div>
+        </div>
+        <div class="info-box">
+            <i class="fas fa-laptop"></i>
+            <div style="font-size: 12px; color: var(--text-sub);">Лимит устройств</div>
+            <div id="device-limit">1 / 1</div>
+        </div>
+    </div>
+
+    <div class="wheel-section">
+        <h3 style="margin-top:0"><i class="fas fa-gift" style="color:#facc15"></i> Еженедельный бонус</h3>
+        <p style="font-size: 13px; color: var(--text-sub);" id="wheel-timer">Крутите колесо и выигрывайте призы!</p>
+        <button id="spin-btn" onclick="startSpin()">Испытать удачу</button>
+    </div>
+
+    <div class="footer-text">v3.2.0 • Защищенное соединение активно</div>
 
     <script>
-        let tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Получаем данные из URL
-        const params = new URLSearchParams(window.location.search);
-        document.getElementById('uid').innerText = params.get('id') || 'Неизвестно';
-        document.getElementById('bal').innerText = params.get('bal') || '0';
-        document.getElementById('exp').innerText = params.get('exp') || 'Нет';
+        // Парсинг данных из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById('user-id-val').innerText = urlParams.get('id') || 'Unknown';
+        document.getElementById('balance-val').innerText = urlParams.get('bal') || '0';
+        document.getElementById('expires-val').innerText = urlParams.get('exp') || 'Нет';
         
-        if(params.get('exp') === 'Нет') {
-            document.getElementById('status').innerText = 'Неактивна';
-            document.getElementById('status').style.background = '#ef4444';
+        // Лимит устройств
+        const extraDev = parseInt(urlParams.get('dev')) || 0;
+        document.getElementById('device-limit').innerText = `1 / ${1 + extraDev}`;
+
+        if(urlParams.get('exp') === 'Нет') {
+            document.getElementById('sub-status').innerText = 'Неактивен';
+            document.getElementById('sub-status').style.backgroundColor = 'var(--danger)';
         }
+
+        // Тема
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            document.querySelector('.theme-toggle i').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        if(localStorage.getItem('theme') === 'light') toggleTheme();
+
+        // Логика рулетки
+        function checkWheel() {
+            const lastSpin = localStorage.getItem('last_spin');
+            const now = new Date().getTime();
+            const week = 7 * 24 * 60 * 60 * 1000;
+
+            if (lastSpin && (now - lastSpin < week)) {
+                const timeLeft = week - (now - lastSpin);
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                document.getElementById('spin-btn').disabled = true;
+                document.getElementById('wheel-timer').innerText = `Следующая попытка через ${days} дн.`;
+            }
+        }
+
+        function startSpin() {
+            const btn = document.getElementById('spin-btn');
+            btn.innerText = "Вращаем...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const rand = Math.random() * 100;
+                let result = "";
+
+                if (rand < 80) {
+                    result = "К сожалению, в этот раз пусто. Повезет через неделю!";
+                } else if (rand < 90) {
+                    const cash = Math.floor(Math.random() * 11) + 5;
+                    result = `Поздравляем! Вы выиграли ${cash}₽ на баланс. Напишите в поддержку для зачисления.`;
+                } else {
+                    result = "Ого! Вы выиграли +1 день подписки! Напишите админу.";
+                }
+
+                alert(result);
+                localStorage.setItem('last_spin', new Date().getTime());
+                checkWheel();
+            }, 2000);
+        }
+
+        checkWheel();
     </script>
 </body>
 </html>
