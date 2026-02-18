@@ -34,6 +34,7 @@
             padding: 16px;
             transition: all 0.3s ease;
             user-select: none;
+            overflow-x: hidden;
         }
 
         .header {
@@ -46,15 +47,21 @@
         .card {
             background: var(--card-bg);
             border-radius: 20px;
-            padding: 18px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             margin-bottom: 16px;
             border: 1px solid var(--card-border);
         }
 
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
-        .label { color: var(--text-sub); font-size: 14px; }
-        .value { font-weight: 600; }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .value { font-weight: 600; font-size: 16px; }
 
         .btn {
             display: flex;
@@ -63,34 +70,49 @@
             gap: 10px;
             width: 100%;
             padding: 15px;
-            border-radius: 14px;
+            border-radius: 15px;
             border: none;
             font-weight: 800;
             font-size: 15px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.3s;
         }
 
-        .btn-primary { background: var(--accent); color: #000; }
-        
-        /* Состояние заблокированной кнопки */
+        .btn-primary { 
+            background: var(--accent); 
+            color: #000; 
+        }
+
+        /* Стиль для заблокированной кнопки */
         .btn:disabled {
             background: #334155 !important;
             color: #64748b !important;
             cursor: not-allowed;
-            box-shadow: none !important;
+            box-shadow: none;
         }
 
         .theme-toggle {
             background: var(--card-bg);
             border: 1px solid var(--accent);
             color: var(--accent);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+        }
+
+        .wheel-box {
+            text-align: center;
+            border: 2px solid var(--accent);
+        }
+
+        #timer-text {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -107,25 +129,35 @@
     </div>
 
     <div class="card">
-        <div class="info-row"><span class="label">Твой ID</span> <span class="value" id="u-id">...</span></div>
-        <div class="info-row"><span class="label">Баланс</span> <span class="value" id="u-bal" style="color: var(--success);">0₽</span></div>
-        <div class="info-row"><span class="label">Срок до</span> <span class="value" id="u-exp">...</span></div>
+        <div class="info-row">
+            <span class="label"><i class="fas fa-id-badge"></i> ID</span>
+            <span class="value" id="u-id">...</span>
+        </div>
+        <div class="info-row">
+            <span class="label"><i class="fas fa-wallet"></i> Баланс</span>
+            <span class="value" id="u-bal" style="color: var(--success);">0₽</span>
+        </div>
+        <div class="info-row">
+            <span class="label"><i class="fas fa-calendar-alt"></i> Истекает</span>
+            <span class="value" id="u-exp">...</span>
+        </div>
     </div>
 
     <div class="card">
-        <div style="text-align: center; font-weight: 700; color: var(--accent); margin-bottom: 15px;">КОНФИГУРАЦИЯ</div>
+        <div style="text-align: center; font-weight: 800; color: var(--accent); margin-bottom: 15px;">КОНФИГУРАЦИЯ</div>
         <button class="btn btn-primary" onclick="copyKeys()">
             <i class="fas fa-copy"></i> СКОПИРОВАТЬ 12 КЛЮЧЕЙ
         </button>
     </div>
 
-    <div class="card" style="text-align: center; border: 1px solid var(--accent);">
-        <div style="font-weight: 800; margin-bottom: 5px;">🎡 LUCKY WHEEL</div>
-        <div id="timer-status" style="font-size: 12px; color: var(--text-sub); margin-bottom: 15px;">Проверка...</div>
+    <div class="card wheel-box">
+        <div style="font-weight: 800; font-size: 18px; margin-bottom: 5px;">🎉 LUCKY WHEEL</div>
+        <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px;">Бонус раз в 6 дней</p>
         
         <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">
-            КРУТИТЬ
+            КРУТИТЬ БЕСПЛАТНО
         </button>
+        <div id="timer-text">Загрузка...</div>
     </div>
 
     <script>
@@ -134,40 +166,55 @@
 
         const params = new URLSearchParams(window.location.search);
         const lastSpin = parseFloat(params.get('ls')) || 0;
-        const cooldownTime = 518400; // 6 дней в секундах
+        const cooldownSeconds = 518400; // 6 дней
 
-        // Список серверов
-        const ALL_SERVERS = `vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@ru.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=d3a33c06d9008b&type=tcp#🇷🇺 LTE (zuuvpn)\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@37.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=5803806787f2e298&type=tcp#🇷🇺 LTE 2 (zuuvpn)\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=c37545&type=tcp&tfo=1#🇷🇺 LTE 3 (zuuvpn)\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@5.188.140.126:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=ec80ef&type=tcp#🇷🇺 LTE 4 (zuuvpn)\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109-2.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=7c5c97ed&type=tcp#🇷🇺 LTE 5 (zuuvpn)\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@46.volnalink.uk:4343?encryption=none&flow=xtls-rprx-vision&security=reality&sni=sun6-21.userapi.com&fp=qq&pbk=a3_DLO6p_ZfPf7I0JFTVlAI2pPAPtC-ji2diyPcHcQA&sid=f0a491&type=tcp&tfo=1#🇷🇺 LTE 6 (zuuvpn)\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@ru.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=ec80ef&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@37.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=33652caa6c&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 2\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=c37545&type=tcp&tfo=1#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 3\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@5.188.140.126:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=9e3378923f8e0007&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 4\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109-2.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=0c45&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 5\nvless://d9bdfdb6-0cb9-4f31-9117-944f76759254@46.volnalink.uk:4343?encryption=none&flow=xtls-rprx-vision&security=reality&sni=sun6-21.userapi.com&fp=qq&pbk=a3_DLO6p_ZfPf7I0JFTVlAI2pPAPtC-ji2diyPcHcQA&sid=7f892758&type=tcp&tfo=1#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 6`;
+        const ALL_SERVERS = [
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@ru.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=d3a33c06d9008b&type=tcp#🇷🇺 LTE (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@37.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=5803806787f2e298&type=tcp#🇷🇺 LTE 2 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=c37545&type=tcp&tfo=1#🇷🇺 LTE 3 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@5.188.140.126:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=ec80ef&type=tcp#🇷🇺 LTE 4 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109-2.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=7c5c97ed&type=tcp#🇷🇺 LTE 5 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@46.volnalink.uk:4343?encryption=none&flow=xtls-rprx-vision&security=reality&sni=sun6-21.userapi.com&fp=qq&pbk=a3_DLO6p_ZfPf7I0JFTVlAI2pPAPtC-ji2diyPcHcQA&sid=f0a491&type=tcp&tfo=1#🇷🇺 LTE 6 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@ru.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=ec80ef&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@37.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=33652caa6c&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 2",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=c37545&type=tcp&tfo=1#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 3",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@5.188.140.126:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=9e3378923f8e0007&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 4",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109-2.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=0c45&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 5",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@46.volnalink.uk:4343?encryption=none&flow=xtls-rprx-vision&security=reality&sni=sun6-21.userapi.com&fp=qq&pbk=a3_DLO6p_ZfPf7I0JFTVlAI2pPAPtC-ji2diyPcHcQA&sid=7f892758&type=tcp&tfo=1#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 6"
+        ];
 
-        // Заполнение данных профиля
         document.getElementById('u-id').innerText = params.get('id') || '0';
         document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
         document.getElementById('u-exp').innerText = params.get('exp') || 'Нет';
 
-        function checkCooldown() {
+        function updateTimer() {
             const btn = document.getElementById('spin-btn');
-            const status = document.getElementById('timer-status');
+            const timerText = document.getElementById('timer-text');
             const now = Math.floor(Date.now() / 1000);
-            const timeLeft = (lastSpin + cooldownTime) - now;
+            const timeLeft = (lastSpin + cooldownSeconds) - now;
 
             if (timeLeft > 0) {
+                // Если КД идет - блокируем кнопку и меняем текст
                 btn.disabled = true;
                 const d = Math.floor(timeLeft / 86400);
                 const h = Math.floor((timeLeft % 86400) / 3600);
-                btn.innerText = `ЖДАТЬ ${d}д ${h}ч`;
-                status.innerText = "Бонус временно недоступен";
-                return true;
+                const m = Math.floor((timeLeft % 3600) / 60);
+                
+                btn.innerText = `ЖДАТЬ ${d}Д ${h}Ч`;
+                timerText.innerHTML = `<i class="fas fa-lock"></i> Доступно через: ${d}д ${h}ч ${m}м`;
+                return true; 
             } else {
+                // Если КД прошло - разблокируем
                 btn.disabled = false;
                 btn.innerText = "КРУТИТЬ БЕСПЛАТНО";
-                status.innerText = "Вы можете забрать свой бонус!";
+                timerText.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success)"></i> Можно использовать!`;
                 return false;
             }
         }
 
         function startSpin() {
-            // Двойная проверка КД
-            if (checkCooldown()) return;
+            // ФИНАЛЬНАЯ ПРОВЕРКА: Если таймер еще тикает, прерываем функцию сразу
+            if (updateTimer()) return;
 
             const btn = document.getElementById('spin-btn');
             btn.disabled = true;
@@ -176,26 +223,27 @@
             setTimeout(() => {
                 const rand = Math.random() * 100;
                 let prize = { action: 'wheel_prize', type: 'nothing' };
-                let msg = "😢 Пусто! Повезет в другой раз.";
+                let msg = "😢 Сегодня не повезло. Заходи через 6 дней!";
 
                 if (rand < 15) {
                     prize = { action: 'wheel_prize', type: 'money', amount: 10 };
                     msg = "🎁 ВЫИГРЫШ: 10₽ на баланс!";
                 } else if (rand < 25) {
                     prize = { action: 'wheel_prize', type: 'sub' };
-                    msg = "📅 ВЫИГРЫШ: +1 день подписки!";
+                    msg = "📅 ВЫИГРЫШ: +1 день к подписке!";
                 }
 
                 tg.showAlert(msg, () => {
                     tg.sendData(JSON.stringify(prize));
-                    tg.close();
+                    setTimeout(() => tg.close(), 500);
                 });
             }, 2000);
         }
 
         function copyKeys() {
+            const text = ALL_SERVERS.join('\n');
             const el = document.createElement('textarea');
-            el.value = ALL_SERVERS;
+            el.value = text;
             document.body.appendChild(el);
             el.select();
             document.execCommand('copy');
@@ -211,9 +259,11 @@
             tg.setHeaderColor(isLight ? '#f1f5f9' : '#0f172a');
         }
 
-        // Первичный запуск таймера
-        checkCooldown();
-        setInterval(checkCooldown, 60000);
+        // Инициализация при загрузке
+        updateTimer();
+        setInterval(updateTimer, 60000); // Обновление раз в минуту
+        
+        if (tg.colorScheme === 'light') toggleTheme();
     </script>
 </body>
 </html>
