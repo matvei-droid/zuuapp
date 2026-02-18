@@ -17,22 +17,14 @@
             --success: #10b981;
         }
 
-        .light-theme {
-            --bg-color: #f1f5f9;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-sub: #64748b;
-            --accent: #0ea5e9;
-        }
-
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 16px;
-            transition: 0.3s;
             user-select: none;
+            overflow-x: hidden;
         }
 
         /* Шапка */
@@ -43,94 +35,81 @@
             margin-bottom: 20px;
         }
 
-        .theme-toggle {
-            background: var(--card-bg);
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 8px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        /* Карточка профиля */
+        /* Основная карточка профиля */
         .card {
             background: var(--card-bg);
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             margin-bottom: 16px;
             position: relative;
-            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .status-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: var(--success);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
-        .user-id { font-size: 14px; color: var(--text-sub); }
-        .balance { font-size: 32px; font-weight: 800; margin: 10px 0; color: var(--accent); }
+        .info-row:last-child { margin-bottom: 0; }
 
-        /* Прогресс-бар трафика */
-        .stats-row { display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px; }
-        .progress-container {
-            background: rgba(148, 163, 184, 0.2);
-            height: 8px;
-            border-radius: 4px;
-            margin-top: 8px;
-        }
-        .progress-bar {
-            background: linear-gradient(90deg, var(--accent), #818cf8);
-            width: 75%; height: 100%; border-radius: 4px;
-        }
+        .label { color: var(--text-sub); font-size: 14px; }
+        .value { font-weight: 600; font-size: 16px; }
 
-        /* Сетка инфо */
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .info-box {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 16px;
+        .balance-val { color: var(--success); font-size: 20px; }
+
+        /* Блок рулетки */
+        .wheel-box {
             text-align: center;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid var(--accent);
         }
-        .info-box i { color: var(--accent); margin-bottom: 8px; font-size: 20px; }
-        .info-box div:last-child { font-weight: bold; margin-top: 4px; }
 
-        /* Рулетка */
-        .wheel-section {
-            text-align: center;
-            padding: 20px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            margin-top: 20px;
+        .wheel-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        #spin-btn {
+
+        .btn-spin {
             background: var(--accent);
-            color: white;
+            color: #000;
             border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: bold;
-            width: 100%;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-weight: 800;
             font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
         }
-        #spin-btn:disabled { background: var(--text-sub); opacity: 0.6; }
 
-        .footer-text {
-            text-align: center;
-            font-size: 12px;
+        .btn-spin:disabled {
+            background: #475569;
             color: var(--text-sub);
-            margin-top: 20px;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        #timer {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .status-online {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 5px;
+            box-shadow: 0 0 10px var(--success);
         }
     </style>
 </head>
@@ -138,116 +117,122 @@
 
     <div class="header">
         <div>
-            <div style="font-weight: bold; font-size: 20px;">Zuu VPN <span style="color:var(--accent)">Premium</span></div>
+            <h2 style="margin:0;">Zuu VPN</h2>
+            <span style="font-size: 12px; color: var(--text-sub);">
+                <span class="status-online"></span> Система активна
+            </span>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()">
-            <i class="fas fa-moon"></i>
-        </button>
+        <i class="fas fa-shield-alt fa-2x" style="color: var(--accent);"></i>
     </div>
 
     <div class="card">
-        <div class="status-badge" id="sub-status">Активен</div>
-        <div class="user-id">ID: <span id="user-id-val">000000</span></div>
-        <div class="balance"><span id="balance-val">0</span> ₽</div>
+        <div class="info-row">
+            <span class="label"><i class="fas fa-id-badge"></i> Твой ID</span>
+            <span class="value" id="u-id">Загрузка...</span>
+        </div>
+        <div class="info-row">
+            <span class="label"><i class="fas fa-wallet"></i> Баланс</span>
+            <span class="value balance-val" id="u-bal">0₽</span>
+        </div>
+        <div class="info-row">
+            <span class="label"><i class="fas fa-calendar-alt"></i> Истекает</span>
+            <span class="value" id="u-exp">...</span>
+        </div>
+        <div class="info-row">
+            <span class="label"><i class="fas fa-mobile-alt"></i> Доп. устройства</span>
+            <span class="value" id="u-dev">0</span>
+        </div>
+    </div>
+
+    <div class="card wheel-box">
+        <div class="wheel-title">🎉 Lucky Wheel</div>
+        <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px;">
+            Испытай удачу раз в 6 дней и получи бонус на свой аккаунт!
+        </p>
         
-        <div class="stats-row">
-            <span>Трафик (Безлимит)</span>
-            <span>∞ ГБ</span>
-        </div>
-        <div class="progress-container">
-            <div class="progress-bar"></div>
-        </div>
+        <button class="btn-spin" id="spin-btn" onclick="startSpin()">КРУТИТЬ БЕСПЛАТНО</button>
+        <div id="timer">Проверка доступности...</div>
     </div>
-
-    <div class="info-grid">
-        <div class="info-box">
-            <i class="fas fa-calendar-alt"></i>
-            <div style="font-size: 12px; color: var(--text-sub);">Истекает</div>
-            <div id="expires-val">--.--.----</div>
-        </div>
-        <div class="info-box">
-            <i class="fas fa-laptop"></i>
-            <div style="font-size: 12px; color: var(--text-sub);">Лимит устройств</div>
-            <div id="device-limit">1 / 1</div>
-        </div>
-    </div>
-
-    <div class="wheel-section">
-        <h3 style="margin-top:0"><i class="fas fa-gift" style="color:#facc15"></i> Еженедельный бонус</h3>
-        <p style="font-size: 13px; color: var(--text-sub);" id="wheel-timer">Крутите колесо и выигрывайте призы!</p>
-        <button id="spin-btn" onclick="startSpin()">Испытать удачу</button>
-    </div>
-
-    <div class="footer-text">v3.2.0 • Защищенное соединение активно</div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.ready();
 
-        // Парсинг данных из URL
-        const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById('user-id-val').innerText = urlParams.get('id') || 'Unknown';
-        document.getElementById('balance-val').innerText = urlParams.get('bal') || '0';
-        document.getElementById('expires-val').innerText = urlParams.get('exp') || 'Нет';
-        
-        // Лимит устройств
-        const extraDev = parseInt(urlParams.get('dev')) || 0;
-        document.getElementById('device-limit').innerText = `1 / ${1 + extraDev}`;
+        // Парсим данные из URL (которые бот передал в ссылке)
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('id') || 'Неизвестно';
+        const userBal = params.get('bal') || '0';
+        const userExp = params.get('exp') || 'Нет';
+        const userDev = params.get('dev') || '0';
+        const lastSpin = parseFloat(params.get('ls')) || 0; // Время последнего прокрута в сек
 
-        if(urlParams.get('exp') === 'Нет') {
-            document.getElementById('sub-status').innerText = 'Неактивен';
-            document.getElementById('sub-status').style.backgroundColor = 'var(--danger)';
-        }
+        // Заполняем профиль
+        document.getElementById('u-id').innerText = userId;
+        document.getElementById('u-bal').innerText = userBal + '₽';
+        document.getElementById('u-exp').innerText = userExp;
+        document.getElementById('u-dev').innerText = userDev;
 
-        // Тема
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-            const isLight = document.body.classList.contains('light-theme');
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
-            document.querySelector('.theme-toggle i').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
-        }
+        function updateTimer() {
+            const btn = document.getElementById('spin-btn');
+            const timerDiv = document.getElementById('timer');
+            const now = Math.floor(Date.now() / 1000);
+            const cooldown = 6 * 24 * 60 * 60; // 6 суток
+            const timeLeft = (lastSpin + cooldown) - now;
 
-        if(localStorage.getItem('theme') === 'light') toggleTheme();
-
-        // Логика рулетки
-        function checkWheel() {
-            const lastSpin = localStorage.getItem('last_spin');
-            const now = new Date().getTime();
-            const week = 7 * 24 * 60 * 60 * 1000;
-
-            if (lastSpin && (now - lastSpin < week)) {
-                const timeLeft = week - (now - lastSpin);
-                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                document.getElementById('spin-btn').disabled = true;
-                document.getElementById('wheel-timer').innerText = `Следующая попытка через ${days} дн.`;
+            if (timeLeft > 0) {
+                btn.disabled = true;
+                const d = Math.floor(timeLeft / (24*3600));
+                const h = Math.floor((timeLeft % (24*3600)) / 3600);
+                const m = Math.floor((timeLeft % 3600) / 60);
+                timerDiv.innerHTML = `<i class="fas fa-lock"></i> Доступно через: ${d}д ${h}ч ${m}м`;
+            } else {
+                btn.disabled = false;
+                timerDiv.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success)"></i> Готово к использованию!`;
             }
         }
 
         function startSpin() {
             const btn = document.getElementById('spin-btn');
-            btn.innerText = "Вращаем...";
             btn.disabled = true;
+            btn.innerText = "ВРАЩАЕМ...";
 
+            // Имитация вращения 2 секунды
             setTimeout(() => {
                 const rand = Math.random() * 100;
-                let result = "";
+                let prize = { action: 'wheel_prize', type: 'nothing' };
+                let resultText = "";
 
-                if (rand < 80) {
-                    result = "К сожалению, в этот раз пусто. Повезет через неделю!";
-                } else if (rand < 90) {
-                    const cash = Math.floor(Math.random() * 11) + 5;
-                    result = `Поздравляем! Вы выиграли ${cash}₽ на баланс. Напишите в поддержку для зачисления.`;
+                // ШАНСЫ: 10% - деньги, 10% - день подписки, 80% - пусто
+                if (rand < 10) {
+                    const winMoney = Math.floor(Math.random() * 11) + 5; // 5-15 руб
+                    prize = { action: 'wheel_prize', type: 'money', amount: winMoney };
+                    resultText = `🔥 ВЫИГРЫШ: ${winMoney}₽ на баланс!`;
+                } else if (rand < 20) {
+                    prize = { action: 'wheel_prize', type: 'sub' };
+                    resultText = `📅 ВЫИГРЫШ: +1 день к подписке!`;
                 } else {
-                    result = "Ого! Вы выиграли +1 день подписки! Напишите админу.";
+                    resultText = "😢 В этот раз пусто. Повезет через неделю!";
                 }
 
-                alert(result);
-                localStorage.setItem('last_spin', new Date().getTime());
-                checkWheel();
+                alert(resultText);
+                
+                // Отправляем данные боту (метод sendData работает только в KeyboardButton WebApp)
+                // Если ты используешь Inline кнопку, лучше использовать метод через API, 
+                // но для KeyboardButton этот код идеален:
+                tg.sendData(JSON.stringify(prize));
+                
+                // Закрываем приложение через секунду
+                setTimeout(() => tg.close(), 1000);
+
             }, 2000);
         }
 
-        checkWheel();
+        // Запускаем таймер сразу
+        updateTimer();
+        // Обновляем раз в минуту
+        setInterval(updateTimer, 60000);
+
     </script>
 </body>
 </html>
