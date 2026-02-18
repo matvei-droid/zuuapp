@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zuu VPN Profile</title>
+    <title>Zuu VPN Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -13,21 +13,32 @@
             --text-main: #ffffff;
             --text-sub: #94a3b8;
             --accent: #38bdf8;
-            --danger: #f43f5e;
             --success: #10b981;
+            --danger: #f43f5e;
+            --card-border: rgba(255,255,255,0.05);
+        }
+
+        /* Светлая тема */
+        body.light-mode {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --accent: #0284c7;
+            --card-border: rgba(0,0,0,0.1);
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 16px;
+            transition: all 0.3s ease;
             user-select: none;
             overflow-x: hidden;
         }
 
-        /* Шапка */
         .header {
             display: flex;
             justify-content: space-between;
@@ -35,15 +46,30 @@
             margin-bottom: 20px;
         }
 
-        /* Основная карточка профиля */
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+        }
+
         .card {
             background: var(--card-bg);
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             margin-bottom: 16px;
-            position: relative;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--card-border);
         }
 
         .info-row {
@@ -54,62 +80,69 @@
         }
 
         .info-row:last-child { margin-bottom: 0; }
-
-        .label { color: var(--text-sub); font-size: 14px; }
+        .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 8px; }
         .value { font-weight: 600; font-size: 16px; }
 
-        .balance-val { color: var(--success); font-size: 20px; }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            margin-top: 10px;
+        }
 
-        /* Блок рулетки */
+        .btn-primary { 
+            background: var(--accent); 
+            color: #000; 
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-secondary { 
+            background: rgba(56, 189, 248, 0.1); 
+            color: var(--accent); 
+            border: 1px solid var(--accent); 
+        }
+
+        .btn:disabled {
+            background: #475569 !important;
+            color: #94a3b8 !important;
+            box-shadow: none;
+            cursor: not-allowed;
+            border: none;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
         .wheel-box {
             text-align: center;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(145deg, var(--card-bg) 0%, rgba(56,189,248,0.05) 100%);
             border: 2px solid var(--accent);
         }
 
-        .wheel-title {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-spin {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 15px;
-            font-weight: 800;
-            font-size: 16px;
-            width: 100%;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-        }
-
-        .btn-spin:disabled {
-            background: #475569;
+        #timer-text {
+            font-size: 12px;
             color: var(--text-sub);
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        #timer {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--text-sub);
-        }
-
-        .status-online {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            margin-right: 5px;
-            box-shadow: 0 0 10px var(--success);
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -118,21 +151,23 @@
     <div class="header">
         <div>
             <h2 style="margin:0;">Zuu VPN</h2>
-            <span style="font-size: 12px; color: var(--text-sub);">
-                <span class="status-online"></span> Система активна
-            </span>
+            <div class="status-badge">
+                <div class="status-dot"></div> Система активна
+            </div>
         </div>
-        <i class="fas fa-shield-alt fa-2x" style="color: var(--accent);"></i>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
     </div>
 
     <div class="card">
         <div class="info-row">
-            <span class="label"><i class="fas fa-id-badge"></i> Твой ID</span>
-            <span class="value" id="u-id">Загрузка...</span>
+            <span class="label"><i class="fas fa-id-badge"></i> ID</span>
+            <span class="value" id="u-id">...</span>
         </div>
         <div class="info-row">
             <span class="label"><i class="fas fa-wallet"></i> Баланс</span>
-            <span class="value balance-val" id="u-bal">0₽</span>
+            <span class="value" id="u-bal" style="color: var(--success);">0₽</span>
         </div>
         <div class="info-row">
             <span class="label"><i class="fas fa-calendar-alt"></i> Истекает</span>
@@ -144,14 +179,27 @@
         </div>
     </div>
 
-    <div class="card wheel-box">
-        <div class="wheel-title">🎉 Lucky Wheel</div>
-        <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px;">
-            Испытай удачу раз в 6 дней и получи бонус на свой аккаунт!
+    <div class="card">
+        <div style="text-align: center; font-weight: 800; color: var(--accent); margin-bottom: 15px; letter-spacing: 1px;">КОНФИГУРАЦИЯ</div>
+        <button class="btn btn-primary" onclick="installSub()">
+            <i class="fas fa-bolt"></i> УСТАНОВИТЬ В APP
+        </button>
+        <button class="btn btn-secondary" onclick="copyKeys()">
+            <i class="fas fa-copy"></i> КОПИРОВАТЬ 12 КЛЮЧЕЙ
+        </button>
+        <p style="font-size: 11px; color: var(--text-sub); text-align: center; margin-top: 15px;">
+            Кнопка «Установить» автоматически добавит все LTE серверы в ваш VPN клиент.
         </p>
+    </div>
+
+    <div class="card wheel-box">
+        <div style="font-weight: 800; font-size: 18px; margin-bottom: 5px;">🎉 LUCKY WHEEL</div>
+        <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px;">Бонус раз в 6 дней</p>
         
-        <button class="btn-spin" id="spin-btn" onclick="startSpin()">КРУТИТЬ БЕСПЛАТНО</button>
-        <div id="timer">Проверка доступности...</div>
+        <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">
+            КРУТИТЬ БЕСПЛАТНО
+        </button>
+        <div id="timer-text">Загрузка...</div>
     </div>
 
     <script>
@@ -159,36 +207,51 @@
         tg.expand();
         tg.ready();
 
-        // Парсим данные из URL (которые бот передал в ссылке)
+        // Данные из URL
         const params = new URLSearchParams(window.location.search);
-        const userId = params.get('id') || 'Неизвестно';
-        const userBal = params.get('bal') || '0';
-        const userExp = params.get('exp') || 'Нет';
-        const userDev = params.get('dev') || '0';
-        const lastSpin = parseFloat(params.get('ls')) || 0; // Время последнего прокрута в сек
+        const lastSpin = parseFloat(params.get('ls')) || 0;
+        
+        // Массив всех 12 серверов
+        const ALL_SERVERS = [
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@ru.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=d3a33c06d9008b&type=tcp#🇷🇺 LTE (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@37.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=5803806787f2e298&type=tcp#🇷🇺 LTE 2 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=c37545&type=tcp&tfo=1#🇷🇺 LTE 3 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@5.188.140.126:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=ec80ef&type=tcp#🇷🇺 LTE 4 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109-2.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=7c5c97ed&type=tcp#🇷🇺 LTE 5 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@46.volnalink.uk:4343?encryption=none&flow=xtls-rprx-vision&security=reality&sni=sun6-21.userapi.com&fp=qq&pbk=a3_DLO6p_ZfPf7I0JFTVlAI2pPAPtC-ji2diyPcHcQA&sid=f0a491&type=tcp&tfo=1#🇷🇺 LTE 6 (zuuvpn)",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@ru.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=ec80ef&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@37.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=33652caa6c&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 2",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=c37545&type=tcp&tfo=1#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 3",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@5.188.140.126:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=9e3378923f8e0007&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 4",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109-2.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=0c45&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 5",
+            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@46.volnalink.uk:4343?encryption=none&flow=xtls-rprx-vision&security=reality&sni=sun6-21.userapi.com&fp=qq&pbk=a3_DLO6p_ZfPf7I0JFTVlAI2pPAPtC-ji2diyPcHcQA&sid=7f892758&type=tcp&tfo=1#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 6"
+        ];
 
-        // Заполняем профиль
-        document.getElementById('u-id').innerText = userId;
-        document.getElementById('u-bal').innerText = userBal + '₽';
-        document.getElementById('u-exp').innerText = userExp;
-        document.getElementById('u-dev').innerText = userDev;
+        // Инициализация интерфейса
+        document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
+        document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
+        document.getElementById('u-exp').innerText = params.get('exp') || 'Нет';
+        document.getElementById('u-dev').innerText = params.get('dev') || '0';
 
         function updateTimer() {
             const btn = document.getElementById('spin-btn');
-            const timerDiv = document.getElementById('timer');
+            const timerText = document.getElementById('timer-text');
             const now = Math.floor(Date.now() / 1000);
-            const cooldown = 6 * 24 * 60 * 60; // 6 суток
+            const cooldown = 518400; // 6 суток
             const timeLeft = (lastSpin + cooldown) - now;
 
             if (timeLeft > 0) {
                 btn.disabled = true;
-                const d = Math.floor(timeLeft / (24*3600));
-                const h = Math.floor((timeLeft % (24*3600)) / 3600);
+                const d = Math.floor(timeLeft / 86400);
+                const h = Math.floor((timeLeft % 86400) / 3600);
                 const m = Math.floor((timeLeft % 3600) / 60);
-                timerDiv.innerHTML = `<i class="fas fa-lock"></i> Доступно через: ${d}д ${h}ч ${m}м`;
+                
+                btn.innerText = `ДОСТУПНО ЧЕРЕЗ ${d}Д ${h}Ч`;
+                timerText.innerHTML = `<i class="fas fa-lock"></i> Осталось: ${d}д ${h}ч ${m}м`;
             } else {
                 btn.disabled = false;
-                timerDiv.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success)"></i> Готово к использованию!`;
+                btn.innerText = "КРУТИТЬ БЕСПЛАТНО";
+                timerText.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success)"></i> Можно использовать!`;
             }
         }
 
@@ -197,41 +260,62 @@
             btn.disabled = true;
             btn.innerText = "ВРАЩАЕМ...";
 
-            // Имитация вращения 2 секунды
             setTimeout(() => {
                 const rand = Math.random() * 100;
                 let prize = { action: 'wheel_prize', type: 'nothing' };
-                let resultText = "";
+                let msg = "😢 В этот раз пусто. Повезет через неделю!";
 
-                // ШАНСЫ: 10% - деньги, 10% - день подписки, 80% - пусто
-                if (rand < 10) {
-                    const winMoney = Math.floor(Math.random() * 11) + 5; // 5-15 руб
-                    prize = { action: 'wheel_prize', type: 'money', amount: winMoney };
-                    resultText = `🔥 ВЫИГРЫШ: ${winMoney}₽ на баланс!`;
-                } else if (rand < 20) {
+                if (rand < 15) {
+                    prize = { action: 'wheel_prize', type: 'money', amount: 10 };
+                    msg = "🎁 ВЫИГРЫШ: 10₽ на баланс!";
+                } else if (rand < 25) {
                     prize = { action: 'wheel_prize', type: 'sub' };
-                    resultText = `📅 ВЫИГРЫШ: +1 день к подписке!`;
-                } else {
-                    resultText = "😢 В этот раз пусто. Повезет через неделю!";
+                    msg = "📅 ВЫИГРЫШ: +1 день подписки!";
                 }
 
-                alert(resultText);
-                
-                // Отправляем данные боту (метод sendData работает только в KeyboardButton WebApp)
-                // Если ты используешь Inline кнопку, лучше использовать метод через API, 
-                // но для KeyboardButton этот код идеален:
-                tg.sendData(JSON.stringify(prize));
-                
-                // Закрываем приложение через секунду
-                setTimeout(() => tg.close(), 1000);
-
+                tg.showAlert(msg, () => {
+                    tg.sendData(JSON.stringify(prize));
+                    setTimeout(() => tg.close(), 500);
+                });
             }, 2000);
         }
 
-        // Запускаем таймер сразу
+        function copyKeys() {
+            const text = ALL_SERVERS.join('\n');
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            tg.showAlert("✅ Все 12 серверов скопированы!");
+        }
+
+        function installSub() {
+            // Пытаемся открыть универсальную ссылку для VPN клиентов
+            window.location.href = "hiddify://import/" + ALL_SERVERS[0];
+            
+            setTimeout(() => {
+                tg.showConfirm("Приложение VPN открылось? Если нет, используйте кнопку копирования.", (ok) => {
+                    if(!ok) copyKeys();
+                });
+            }, 1500);
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-icon');
+            const isLight = document.body.classList.contains('light-mode');
+            icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+            tg.setHeaderColor(isLight ? '#f1f5f9' : '#0f172a');
+        }
+
+        // Запуск
         updateTimer();
-        // Обновляем раз в минуту
         setInterval(updateTimer, 60000);
+        
+        // Авто-тема
+        if (tg.colorScheme === 'light') toggleTheme();
 
     </script>
 </body>
