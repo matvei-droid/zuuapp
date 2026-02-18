@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zuu VPN Cabinet</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; margin: 0; padding: 20px; }
+        .card { background: #1e293b; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px; }
+        .status-badge { background: #22c55e; color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; float: right; }
+        .user-id { color: #94a3b8; font-size: 14px; }
+        .balance { font-size: 32px; font-weight: bold; margin: 15px 0; color: #38bdf8; }
+        .info-row { display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px; }
+        .info-item { text-align: center; flex: 1; }
+        .info-label { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 5px; }
+        .info-value { font-weight: bold; font-size: 14px; }
+        .progress-container { margin-top: 20px; }
+        .progress-bar { background: #334155; height: 10px; border-radius: 5px; overflow: hidden; }
+        .progress-fill { background: #38bdf8; width: 15%; height: 100%; }
+        .btn { background: #38bdf8; color: #0f172a; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <span class="status-badge" id="status">Активна</span>
+        <div class="user-id">ID: <span id="uid">000000</span></div>
+        <div class="balance"><span id="bal">0</span> ₽</div>
+        
+        <div class="progress-container">
+            <span class="info-label">Трафик: <span style="float:right">∞ / ∞ ГБ</span></span>
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-item">
+                <span class="info-label">Истекает</span>
+                <span class="info-value" id="exp">Нет</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Устройств</span>
+                <span class="info-value">Без лимита</span>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn" onclick="tg.close()">Вернуться в чат</button>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Получаем данные из URL
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('uid').innerText = params.get('id') || 'Неизвестно';
+        document.getElementById('bal').innerText = params.get('bal') || '0';
+        document.getElementById('exp').innerText = params.get('exp') || 'Нет';
+        
+        if(params.get('exp') === 'Нет') {
+            document.getElementById('status').innerText = 'Неактивна';
+            document.getElementById('status').style.background = '#ef4444';
+        }
+    </script>
+</body>
+</html>
