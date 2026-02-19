@@ -14,6 +14,7 @@
             --text-sub: #94a3b8;
             --accent: #38bdf8;
             --success: #10b981;
+            --danger: #f43f5e;
             --card-border: rgba(255,255,255,0.05);
         }
 
@@ -78,12 +79,9 @@
             transition: 0.3s;
         }
 
-        .btn-primary { 
-            background: var(--accent); 
-            color: #000; 
-        }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-danger { background: var(--danger); color: #fff; }
 
-        /* Стиль для заблокированной кнопки */
         .btn:disabled {
             background: #334155 !important;
             color: #64748b !important;
@@ -109,10 +107,15 @@
             border: 2px solid var(--accent);
         }
 
-        #timer-text {
-            font-size: 12px;
-            color: var(--text-sub);
+        #timer-text { font-size: 12px; color: var(--text-sub); margin-top: 10px; }
+        
+        /* Сообщение об отсутствии подписки */
+        #no-sub-msg {
+            color: var(--danger);
+            font-size: 11px;
             margin-top: 10px;
+            display: none;
+            text-align: center;
         }
     </style>
 </head>
@@ -145,9 +148,10 @@
 
     <div class="card">
         <div style="text-align: center; font-weight: 800; color: var(--accent); margin-bottom: 15px;">КОНФИГУРАЦИЯ</div>
-        <button class="btn btn-primary" onclick="copyKeys()">
+        <button class="btn btn-primary" id="copy-btn" onclick="copyKeys()">
             <i class="fas fa-copy"></i> СКОПИРОВАТЬ 12 КЛЮЧЕЙ
         </button>
+        <div id="no-sub-msg"><i class="fas fa-exclamation-triangle"></i> Купите подписку, чтобы получить доступ к ключам</div>
     </div>
 
     <div class="card wheel-box">
@@ -166,8 +170,11 @@
 
         const params = new URLSearchParams(window.location.search);
         const lastSpin = parseFloat(params.get('ls')) || 0;
-        const cooldownSeconds = 518400; // 6 дней
+        const userExp = params.get('exp'); // Бот должен передавать дату или "Нет"
+        const cooldownSeconds = 518400;
 
+        // ВАЖНО: В реальном проекте ключи лучше получать запросом с сервера, 
+        // но здесь мы хотя бы блокируем кнопку.
         const ALL_SERVERS = [
             "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@ru.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=d3a33c06d9008b&type=tcp#🇷🇺 LTE (zuuvpn)",
             "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@37.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=5803806787f2e298&type=tcp#🇷🇺 LTE 2 (zuuvpn)",
@@ -183,9 +190,24 @@
             "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@46.volnalink.uk:4343?encryption=none&flow=xtls-rprx-vision&security=reality&sni=sun6-21.userapi.com&fp=qq&pbk=a3_DLO6p_ZfPf7I0JFTVlAI2pPAPtC-ji2diyPcHcQA&sid=7f892758&type=tcp&tfo=1#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 6"
         ];
 
+        // Заполнение инфо
         document.getElementById('u-id').innerText = params.get('id') || '0';
         document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-        document.getElementById('u-exp').innerText = params.get('exp') || 'Нет';
+        document.getElementById('u-exp').innerText = userExp || 'Нет';
+
+        // Проверка подписки для кнопки копирования
+        function checkSubscription() {
+            const btn = document.getElementById('copy-btn');
+            const msg = document.getElementById('no-sub-msg');
+            
+            // Если в exp пришло "Нет" или параметр пустой - блокируем
+            if (!userExp || userExp === 'Нет' || userExp === '...' || userExp === 'null') {
+                btn.disabled = true;
+                msg.style.display = 'block';
+                return false;
+            }
+            return true;
+        }
 
         function updateTimer() {
             const btn = document.getElementById('spin-btn');
@@ -194,28 +216,22 @@
             const timeLeft = (lastSpin + cooldownSeconds) - now;
 
             if (timeLeft > 0) {
-                // Если КД идет - блокируем кнопку и меняем текст
                 btn.disabled = true;
                 const d = Math.floor(timeLeft / 86400);
                 const h = Math.floor((timeLeft % 86400) / 3600);
-                const m = Math.floor((timeLeft % 3600) / 60);
-                
                 btn.innerText = `ЖДАТЬ ${d}Д ${h}Ч`;
-                timerText.innerHTML = `<i class="fas fa-lock"></i> Доступно через: ${d}д ${h}ч ${m}м`;
-                return true; 
+                timerText.innerHTML = `<i class="fas fa-lock"></i> Доступно через: ${d}д ${h}ч`;
+                return true;
             } else {
-                // Если КД прошло - разблокируем
                 btn.disabled = false;
                 btn.innerText = "КРУТИТЬ БЕСПЛАТНО";
-                timerText.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success)"></i> Можно использовать!`;
+                timerText.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success)"></i> Готово к использованию!`;
                 return false;
             }
         }
 
         function startSpin() {
-            // ФИНАЛЬНАЯ ПРОВЕРКА: Если таймер еще тикает, прерываем функцию сразу
             if (updateTimer()) return;
-
             const btn = document.getElementById('spin-btn');
             btn.disabled = true;
             btn.innerText = "ВРАЩАЕМ...";
@@ -223,24 +239,27 @@
             setTimeout(() => {
                 const rand = Math.random() * 100;
                 let prize = { action: 'wheel_prize', type: 'nothing' };
-                let msg = "😢 Сегодня не повезло. Заходи через 6 дней!";
+                let msg = "😢 Не повезло! Заходи через 6 дней.";
 
                 if (rand < 15) {
                     prize = { action: 'wheel_prize', type: 'money', amount: 10 };
-                    msg = "🎁 ВЫИГРЫШ: 10₽ на баланс!";
+                    msg = "🎁 ВЫИГРЫШ: 10₽!";
                 } else if (rand < 25) {
                     prize = { action: 'wheel_prize', type: 'sub' };
-                    msg = "📅 ВЫИГРЫШ: +1 день к подписке!";
+                    msg = "📅 ВЫИГРЫШ: +1 день подписки!";
                 }
 
                 tg.showAlert(msg, () => {
                     tg.sendData(JSON.stringify(prize));
-                    setTimeout(() => tg.close(), 500);
+                    tg.close();
                 });
             }, 2000);
         }
 
         function copyKeys() {
+            // Даже если кнопку "взломают", проверяем условие в коде
+            if (!checkSubscription()) return;
+
             const text = ALL_SERVERS.join('\n');
             const el = document.createElement('textarea');
             el.value = text;
@@ -248,7 +267,7 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            tg.showAlert("✅ Все 12 ключей скопированы!");
+            tg.showAlert("✅ Ключи скопированы!");
         }
 
         function toggleTheme() {
@@ -259,11 +278,10 @@
             tg.setHeaderColor(isLight ? '#f1f5f9' : '#0f172a');
         }
 
-        // Инициализация при загрузке
+        // Запуск проверок
         updateTimer();
-        setInterval(updateTimer, 60000); // Обновление раз в минуту
-        
-        if (tg.colorScheme === 'light') toggleTheme();
+        checkSubscription();
+        setInterval(updateTimer, 60000);
     </script>
 </body>
 </html>
