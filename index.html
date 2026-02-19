@@ -9,122 +9,154 @@
     <style>
         :root {
             --bg-color: #0f172a;
-            --card-bg: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.7);
             --text-main: #ffffff;
             --text-sub: #94a3b8;
             --accent: #38bdf8;
             --success: #10b981;
-            --danger: #f43f5e;
-            --card-border: rgba(255,255,255,0.05);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --grad: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
         }
 
         body.light-mode {
-            --bg-color: #f1f5f9;
-            --card-bg: #ffffff;
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.8);
             --text-main: #1e293b;
             --text-sub: #64748b;
             --accent: #0284c7;
-            --card-border: rgba(0,0,0,0.1);
+            --card-border: rgba(0, 0, 0, 0.05);
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 16px;
+            padding: 20px;
             transition: all 0.3s ease;
-            user-select: none;
+            line-height: 1.5;
             overflow-x: hidden;
         }
 
+        /* Улучшенный заголовок */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
+        .brand h2 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: -0.5px;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Стеклянные карточки */
         .card {
             background: var(--card-bg);
-            border-radius: 20px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
             padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            margin-bottom: 16px;
             border: 1px solid var(--card-border);
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.2);
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--card-border);
         }
 
-        .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 8px; }
-        .value { font-weight: 600; font-size: 16px; }
+        .info-row:last-child { border-bottom: none; }
+        .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .value { font-weight: 700; font-size: 15px; }
 
+        /* Кнопки */
         .btn {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             width: 100%;
-            padding: 15px;
-            border-radius: 15px;
+            padding: 16px;
+            border-radius: 18px;
             border: none;
-            font-weight: 800;
-            font-size: 15px;
+            font-weight: 700;
+            font-size: 16px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: transform 0.2s, opacity 0.2s;
         }
 
-        .btn-primary { background: var(--accent); color: #000; }
-        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-primary { 
+            background: var(--grad); 
+            color: #ffffff; 
+            box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.5);
+        }
+
+        .btn:active { transform: scale(0.98); }
 
         .btn:disabled {
-            background: #334155 !important;
-            color: #64748b !important;
+            background: #475569 !important;
+            opacity: 0.6;
             cursor: not-allowed;
             box-shadow: none;
         }
 
         .theme-toggle {
             background: var(--card-bg);
-            border: 1px solid var(--accent);
+            border: 1px solid var(--card-border);
             color: var(--accent);
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
         }
 
+        /* Секция рулетки */
         .wheel-box {
+            background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 100%);
             text-align: center;
-            border: 2px solid var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.3);
         }
 
-        #timer-text { font-size: 12px; color: var(--text-sub); margin-top: 10px; }
-        
-        /* Сообщение об отсутствии подписки */
-        #no-sub-msg {
-            color: var(--danger);
-            font-size: 11px;
-            margin-top: 10px;
-            display: none;
-            text-align: center;
-        }
+        .wheel-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+        .wheel-desc { color: var(--text-sub); font-size: 13px; margin-bottom: 20px; }
+        #timer-text { font-size: 12px; margin-top: 12px; font-weight: 500; }
+
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div>
-            <h2 style="margin:0;">Zuu VPN</h2>
-            <div style="font-size: 12px; color: var(--success);"><i class="fas fa-circle" style="font-size: 8px;"></i> Online</div>
+        <div class="brand">
+            <h2>Zuu VPN Premium</h2>
+            <div class="status-pill">
+                <i class="fas fa-shield-alt"></i> Защищенное соединение
+            </div>
         </div>
         <button class="theme-toggle" onclick="toggleTheme()">
             <i class="fas fa-moon" id="theme-icon"></i>
@@ -133,33 +165,25 @@
 
     <div class="card">
         <div class="info-row">
-            <span class="label"><i class="fas fa-id-badge"></i> ID</span>
+            <span class="label"><i class="fas fa-user-circle"></i> Аккаунт ID</span>
             <span class="value" id="u-id">...</span>
         </div>
         <div class="info-row">
-            <span class="label"><i class="fas fa-wallet"></i> Баланс</span>
+            <span class="label"><i class="fas fa-credit-card"></i> Текущий баланс</span>
             <span class="value" id="u-bal" style="color: var(--success);">0₽</span>
         </div>
         <div class="info-row">
-            <span class="label"><i class="fas fa-calendar-alt"></i> Истекает</span>
+            <span class="label"><i class="fas fa-clock"></i> Подписка до</span>
             <span class="value" id="u-exp">...</span>
         </div>
     </div>
 
-    <div class="card">
-        <div style="text-align: center; font-weight: 800; color: var(--accent); margin-bottom: 15px;">КОНФИГУРАЦИЯ</div>
-        <button class="btn btn-primary" id="copy-btn" onclick="copyKeys()">
-            <i class="fas fa-copy"></i> СКОПИРОВАТЬ 12 КЛЮЧЕЙ
-        </button>
-        <div id="no-sub-msg"><i class="fas fa-exclamation-triangle"></i> Купите подписку, чтобы получить доступ к ключам</div>
-    </div>
-
     <div class="card wheel-box">
-        <div style="font-weight: 800; font-size: 18px; margin-bottom: 5px;">🎉 LUCKY WHEEL</div>
-        <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px;">Бонус раз в 6 дней</p>
+        <div class="wheel-title">🎁 Lucky Wheel</div>
+        <div class="wheel-desc">Испытай удачу и получи бонус к подписке</div>
         
         <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">
-            КРУТИТЬ БЕСПЛАТНО
+            КРУТИТЬ БОНУС
         </button>
         <div id="timer-text">Загрузка...</div>
     </div>
@@ -167,47 +191,16 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.ready();
 
         const params = new URLSearchParams(window.location.search);
         const lastSpin = parseFloat(params.get('ls')) || 0;
-        const userExp = params.get('exp'); // Бот должен передавать дату или "Нет"
-        const cooldownSeconds = 518400;
+        const cooldownSeconds = 518400; // 6 дней
 
-        // ВАЖНО: В реальном проекте ключи лучше получать запросом с сервера, 
-        // но здесь мы хотя бы блокируем кнопку.
-        const ALL_SERVERS = [
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@ru.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=d3a33c06d9008b&type=tcp#🇷🇺 LTE (zuuvpn)",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@37.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=5803806787f2e298&type=tcp#🇷🇺 LTE 2 (zuuvpn)",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=c37545&type=tcp&tfo=1#🇷🇺 LTE 3 (zuuvpn)",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@5.188.140.126:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=ec80ef&type=tcp#🇷🇺 LTE 4 (zuuvpn)",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109-2.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=7c5c97ed&type=tcp#🇷🇺 LTE 5 (zuuvpn)",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@46.volnalink.uk:4343?encryption=none&flow=xtls-rprx-vision&security=reality&sni=sun6-21.userapi.com&fp=qq&pbk=a3_DLO6p_ZfPf7I0JFTVlAI2pPAPtC-ji2diyPcHcQA&sid=f0a491&type=tcp&tfo=1#🇷🇺 LTE 6 (zuuvpn)",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@ru.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=ec80ef&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@37.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=33652caa6c&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 2",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109.volnalink.uk:4449?encryption=none&flow=xtls-rprx-vision&security=reality&sni=max.ru&fp=qq&pbk=n7SozQLXoCxDya7vBJwS5ebj39r4KCUZrfsnBfcCLGs&sid=c37545&type=tcp&tfo=1#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 3",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@5.188.140.126:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=9e3378923f8e0007&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 4",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@109-2.volnalink.uk:5555?encryption=none&flow=xtls-rprx-vision&security=reality&sni=eh.vk.com&fp=qq&pbk=imS00BOMVviktiAFypnoAQkpQ9-cmS-sWasAeTk2aiU&sid=0c45&type=tcp#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 5",
-            "vless://d9bdfdb6-0cb9-4f31-9117-944f76759254@46.volnalink.uk:4343?encryption=none&flow=xtls-rprx-vision&security=reality&sni=sun6-21.userapi.com&fp=qq&pbk=a3_DLO6p_ZfPf7I0JFTVlAI2pPAPtC-ji2diyPcHcQA&sid=7f892758&type=tcp&tfo=1#🇷🇺 LTE - ВСЕ ОПЕРАТОРЫ 6"
-        ];
-
-        // Заполнение инфо
-        document.getElementById('u-id').innerText = params.get('id') || '0';
+        // Данные профиля
+        document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
         document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-        document.getElementById('u-exp').innerText = userExp || 'Нет';
-
-        // Проверка подписки для кнопки копирования
-        function checkSubscription() {
-            const btn = document.getElementById('copy-btn');
-            const msg = document.getElementById('no-sub-msg');
-            
-            // Если в exp пришло "Нет" или параметр пустой - блокируем
-            if (!userExp || userExp === 'Нет' || userExp === '...' || userExp === 'null') {
-                btn.disabled = true;
-                msg.style.display = 'block';
-                return false;
-            }
-            return true;
-        }
+        document.getElementById('u-exp').innerText = params.get('exp') || 'Нет активной';
 
         function updateTimer() {
             const btn = document.getElementById('spin-btn');
@@ -219,13 +212,17 @@
                 btn.disabled = true;
                 const d = Math.floor(timeLeft / 86400);
                 const h = Math.floor((timeLeft % 86400) / 3600);
-                btn.innerText = `ЖДАТЬ ${d}Д ${h}Ч`;
-                timerText.innerHTML = `<i class="fas fa-lock"></i> Доступно через: ${d}д ${h}ч`;
+                const m = Math.floor((timeLeft % 3600) / 60);
+                
+                btn.innerText = `ДОСТУПНО ЧЕРЕЗ ${d}Д ${h}Ч`;
+                timerText.style.color = "var(--text-sub)";
+                timerText.innerHTML = `<i class="fas fa-lock"></i> Следующая попытка через ${d}д ${h}ч ${m}м`;
                 return true;
             } else {
                 btn.disabled = false;
-                btn.innerText = "КРУТИТЬ БЕСПЛАТНО";
-                timerText.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success)"></i> Готово к использованию!`;
+                btn.innerText = "ПОЛУЧИТЬ БОНУС";
+                timerText.style.color = "var(--success)";
+                timerText.innerHTML = `<i class="fas fa-check-circle"></i> Можно крутить!`;
                 return false;
             }
         }
@@ -234,40 +231,26 @@
             if (updateTimer()) return;
             const btn = document.getElementById('spin-btn');
             btn.disabled = true;
-            btn.innerText = "ВРАЩАЕМ...";
+            btn.innerText = "ОЖИДАНИЕ...";
 
             setTimeout(() => {
                 const rand = Math.random() * 100;
                 let prize = { action: 'wheel_prize', type: 'nothing' };
-                let msg = "😢 Не повезло! Заходи через 6 дней.";
+                let msg = "😢 В этот раз пусто. Возвращайтесь через неделю!";
 
                 if (rand < 15) {
                     prize = { action: 'wheel_prize', type: 'money', amount: 10 };
-                    msg = "🎁 ВЫИГРЫШ: 10₽!";
+                    msg = "🎁 Поздравляем! Вы выиграли 10₽!";
                 } else if (rand < 25) {
                     prize = { action: 'wheel_prize', type: 'sub' };
-                    msg = "📅 ВЫИГРЫШ: +1 день подписки!";
+                    msg = "📅 Поздравляем! +1 день подписки добавлен!";
                 }
 
                 tg.showAlert(msg, () => {
                     tg.sendData(JSON.stringify(prize));
-                    tg.close();
+                    setTimeout(() => tg.close(), 300);
                 });
-            }, 2000);
-        }
-
-        function copyKeys() {
-            // Даже если кнопку "взломают", проверяем условие в коде
-            if (!checkSubscription()) return;
-
-            const text = ALL_SERVERS.join('\n');
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            tg.showAlert("✅ Ключи скопированы!");
+            }, 1500);
         }
 
         function toggleTheme() {
@@ -275,13 +258,13 @@
             const icon = document.getElementById('theme-icon');
             const isLight = document.body.classList.contains('light-mode');
             icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
-            tg.setHeaderColor(isLight ? '#f1f5f9' : '#0f172a');
+            tg.setHeaderColor(isLight ? '#f8fafc' : '#0f172a');
         }
 
-        // Запуск проверок
+        // Запуск
         updateTimer();
-        checkSubscription();
         setInterval(updateTimer, 60000);
+        if (tg.colorScheme === 'light') toggleTheme();
     </script>
 </body>
 </html>
