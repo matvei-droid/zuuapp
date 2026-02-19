@@ -28,80 +28,76 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 20px;
+            transition: all 0.3s ease;
+            line-height: 1.5;
             overflow-x: hidden;
         }
 
+        /* Улучшенный заголовок */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .brand h2 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: -0.5px;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Стеклянные карточки */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-radius: 24px;
             padding: 20px;
             border: 1px solid var(--card-border);
             margin-bottom: 20px;
-            text-align: center;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.2);
         }
 
-        /* --- Контейнер колеса --- */
-        .wheel-container {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 0 auto 20px;
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--card-border);
         }
 
-        .wheel-pointer {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 40px;
-            background: #f43f5e;
-            clip-path: polygon(100% 0, 0 0, 50% 100%);
-            z-index: 10;
-        }
+        .info-row:last-child { border-bottom: none; }
+        .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .value { font-weight: 700; font-size: 15px; }
 
-        #wheel {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 5px solid var(--accent);
-            position: relative;
-            overflow: hidden;
-            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
-            background: #1e293b;
-        }
-
-        /* Сектора с текстом */
-        .sector {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            left: 50%;
-            top: 50%;
-            transform-origin: 0 0;
+        /* Кнопки */
+        .btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 800;
-            color: white;
-            text-align: center;
-            box-sizing: border-box;
-            padding-left: 50px;
-            text-transform: uppercase;
-        }
-
-        /* Разные цвета секторов для вида */
-        .sector:nth-child(odd) { background: #1e293b; border: 1px solid rgba(56, 189, 248, 0.1); }
-        .sector:nth-child(even) { background: #334155; border: 1px solid rgba(56, 189, 248, 0.1); }
-
-        .btn {
+            gap: 10px;
             width: 100%;
             padding: 16px;
             border-radius: 18px;
@@ -109,112 +105,166 @@
             font-weight: 700;
             font-size: 16px;
             cursor: pointer;
-            background: var(--grad);
-            color: white;
+            transition: transform 0.2s, opacity 0.2s;
         }
+
+        .btn-primary { 
+            background: var(--grad); 
+            color: #ffffff; 
+            box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.5);
+        }
+
+        .btn:active { transform: scale(0.98); }
 
         .btn:disabled {
-            background: #334155 !important;
-            color: #64748b !important;
+            background: #475569 !important;
+            opacity: 0.6;
             cursor: not-allowed;
+            box-shadow: none;
         }
 
-        #timer-text { margin-top: 10px; font-size: 12px; color: var(--text-sub); }
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--accent);
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Секция рулетки */
+        .wheel-box {
+            background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 100%);
+            text-align: center;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .wheel-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+        .wheel-desc { color: var(--text-sub); font-size: 13px; margin-bottom: 20px; }
+        #timer-text { font-size: 12px; margin-top: 12px; font-weight: 500; }
+
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="wheel-container">
-            <div class="wheel-pointer"></div>
-            <div id="wheel">
-                <div class="sector" style="transform: rotate(-22.5deg) translate(-1px, -1px);"><span>Пусто</span></div>
-                <div class="sector" style="transform: rotate(22.5deg) translate(-1px, -1px);"><span>💰 30₽</span></div>
-                <div class="sector" style="transform: rotate(67.5deg) translate(-1px, -1px);"><span>Пусто</span></div>
-                <div class="sector" style="transform: rotate(112.5deg) translate(-1px, -1px);"><span>📅 3 Дня</span></div>
-                <div class="sector" style="transform: rotate(157.5deg) translate(-1px, -1px);"><span>Пусто</span></div>
-                <div class="sector" style="transform: rotate(202.5deg) translate(-1px, -1px);"><span>💰 5₽</span></div>
-                <div class="sector" style="transform: rotate(247.5deg) translate(-1px, -1px);"><span>Пусто</span></div>
-                <div class="sector" style="transform: rotate(292.5deg) translate(-1px, -1px);"><span>📅 1 День</span></div>
+    <div class="header">
+        <div class="brand">
+            <h2>Zuu VPN Premium</h2>
+            <div class="status-pill">
+                <i class="fas fa-shield-alt"></i> Защищенное соединение
             </div>
         </div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+    </div>
 
-        <button class="btn" id="spin-btn" onclick="startSpin()">КРУТИТЬ КОЛЕСО</button>
+    <div class="card">
+        <div class="info-row">
+            <span class="label"><i class="fas fa-user-circle"></i> Аккаунт ID</span>
+            <span class="value" id="u-id">...</span>
+        </div>
+        <div class="info-row">
+            <span class="label"><i class="fas fa-credit-card"></i> Текущий баланс</span>
+            <span class="value" id="u-bal" style="color: var(--success);">0₽</span>
+        </div>
+        <div class="info-row">
+            <span class="label"><i class="fas fa-clock"></i> Подписка до</span>
+            <span class="value" id="u-exp">...</span>
+        </div>
+    </div>
+
+    <div class="card wheel-box">
+        <div class="wheel-title">🎁 Lucky Wheel</div>
+        <div class="wheel-desc">Испытай удачу и получи бонус к подписке</div>
+        
+        <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">
+            КРУТИТЬ БОНУС
+        </button>
         <div id="timer-text">Загрузка...</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
         const params = new URLSearchParams(window.location.search);
         const lastSpin = parseFloat(params.get('ls')) || 0;
-        const cooldown = 518400; // 6 суток
-        let isSpinning = false;
+        const cooldownSeconds = 518400; // 6 дней
+
+        // Данные профиля
+        document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
+        document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
+        document.getElementById('u-exp').innerText = params.get('exp') || 'Нет активной';
 
         function updateTimer() {
-            if (isSpinning) return true; // Если крутится, считаем что занято
             const btn = document.getElementById('spin-btn');
             const timerText = document.getElementById('timer-text');
             const now = Math.floor(Date.now() / 1000);
-            const timeLeft = (lastSpin + cooldown) - now;
+            const timeLeft = (lastSpin + cooldownSeconds) - now;
 
             if (timeLeft > 0) {
                 btn.disabled = true;
                 const d = Math.floor(timeLeft / 86400);
                 const h = Math.floor((timeLeft % 86400) / 3600);
-                btn.innerText = `ЖДАТЬ ${d}Д ${h}Ч`;
-                timerText.innerHTML = `Доступно через: ${d}д ${h}ч`;
+                const m = Math.floor((timeLeft % 3600) / 60);
+                
+                btn.innerText = `ДОСТУПНО ЧЕРЕЗ ${d}Д ${h}Ч`;
+                timerText.style.color = "var(--text-sub)";
+                timerText.innerHTML = `<i class="fas fa-lock"></i> Следующая попытка через ${d}д ${h}ч ${m}м`;
                 return true;
             } else {
                 btn.disabled = false;
-                btn.innerText = "КРУТИТЬ КОЛЕСО";
-                timerText.innerHTML = "🎁 Удача на вашей стороне!";
+                btn.innerText = "ПОЛУЧИТЬ БОНУС";
+                timerText.style.color = "var(--success)";
+                timerText.innerHTML = `<i class="fas fa-check-circle"></i> Можно крутить!`;
                 return false;
             }
         }
 
         function startSpin() {
-            // ЖЕСТКАЯ ПРОВЕРКА КД
-            if (isSpinning || updateTimer()) return;
-
-            isSpinning = true;
-            const wheel = document.getElementById('wheel');
+            if (updateTimer()) return;
             const btn = document.getElementById('spin-btn');
             btn.disabled = true;
-            btn.innerText = "ВРАЩЕНИЕ...";
-
-            const rand = Math.random() * 100;
-            let targetDeg = 0; 
-            let msg = "";
-
-            if (rand < 10) { // Деньги (10%)
-                const amount = Math.random() > 0.5 ? 30 : 5;
-                msg = `🎁 Поздравляем! Вы выиграли ${amount}₽!`;
-                targetDeg = amount === 30 ? 22.5 : 202.5; 
-            } else if (rand < 20) { // Подписка (10%)
-                const days = Math.random() > 0.5 ? 3 : 1;
-                msg = `📅 Ура! +${days} дня подписки!`;
-                targetDeg = days === 3 ? 112.5 : 292.5;
-            } else { // Пусто (80%)
-                msg = "😢 Сектор 'Пусто'. Попробуйте через 6 дней!";
-                const sectors = [-22.5, 67.5, 157.5, 247.5];
-                targetDeg = sectors[Math.floor(Math.random() * sectors.length)];
-            }
-
-            // 5 оборотов + расчет угла
-            const totalRotation = 1800 + (360 - targetDeg);
-            wheel.style.transform = `rotate(${totalRotation}deg)`;
+            btn.innerText = "ОЖИДАНИЕ...";
 
             setTimeout(() => {
+                const rand = Math.random() * 100;
+                let prize = { action: 'wheel_prize', type: 'nothing' };
+                let msg = "😢 В этот раз пусто. Возвращайтесь через неделю!";
+
+                if (rand < 15) {
+                    prize = { action: 'wheel_prize', type: 'money', amount: 10 };
+                    msg = "🎁 Поздравляем! Вы выиграли 10₽!";
+                } else if (rand < 25) {
+                    prize = { action: 'wheel_prize', type: 'sub' };
+                    msg = "📅 Поздравляем! +1 день подписки добавлен!";
+                }
+
                 tg.showAlert(msg, () => {
-                    tg.sendData(JSON.stringify({action: 'wheel_prize'}));
-                    tg.close();
+                    tg.sendData(JSON.stringify(prize));
+                    setTimeout(() => tg.close(), 300);
                 });
-            }, 4200);
+            }, 1500);
         }
 
-        // Инициализация
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-icon');
+            const isLight = document.body.classList.contains('light-mode');
+            icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+            tg.setHeaderColor(isLight ? '#f8fafc' : '#0f172a');
+        }
+
+        // Запуск
         updateTimer();
-        setInterval(updateTimer, 10000); // Проверка КД каждые 10 сек
+        setInterval(updateTimer, 60000);
+        if (tg.colorScheme === 'light') toggleTheme();
     </script>
 </body>
 </html>
