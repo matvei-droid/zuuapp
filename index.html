@@ -14,6 +14,7 @@
             --text-sub: #94a3b8;
             --accent: #38bdf8;
             --success: #10b981;
+            --danger: #f43f5e;
             --card-border: rgba(255, 255, 255, 0.08);
             --grad: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
         }
@@ -34,70 +35,81 @@
             margin: 0;
             padding: 20px;
             transition: all 0.3s ease;
-            line-height: 1.5;
             overflow-x: hidden;
         }
 
-        /* Улучшенный заголовок */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .brand h2 {
-            margin: 0;
-            font-size: 24px;
-            letter-spacing: -0.5px;
-            background: var(--grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            padding: 4px 10px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        /* Стеклянные карточки */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .brand h2 { margin: 0; font-size: 24px; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-radius: 24px;
             padding: 20px;
             border: 1px solid var(--card-border);
             margin-bottom: 20px;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.2);
         }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--card-border);
-        }
-
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--card-border); }
         .info-row:last-child { border-bottom: none; }
-        .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 10px; }
-        .value { font-weight: 700; font-size: 15px; }
+        .label { color: var(--text-sub); font-size: 14px; }
+        .value { font-weight: 700; }
 
-        /* Кнопки */
-        .btn {
+        /* --- Стили Рулетки --- */
+        .wheel-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 0 auto 25px;
+        }
+
+        /* Маркер (стрелка) */
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            background: #ff4757;
+            clip-path: polygon(100% 0, 0 0, 50% 100%);
+            z-index: 10;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid var(--card-bg);
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+            background: conic-gradient(
+                #1e293b 0deg 45deg, #334155 45deg 90deg, 
+                #1e293b 90deg 135deg, #334155 135deg 180deg, 
+                #1e293b 180deg 225deg, #334155 225deg 270deg, 
+                #1e293b 270deg 315deg, #334155 315deg 360deg
+            );
+        }
+
+        .wheel-label {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            left: 50%;
+            top: 50%;
+            transform-origin: 0 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            font-size: 20px;
+            padding-left: 60px;
+        }
+
+        /* --- Кнопки --- */
+        .btn {
             width: 100%;
             padding: 16px;
             border-radius: 18px;
@@ -105,165 +117,141 @@
             font-weight: 700;
             font-size: 16px;
             cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
+            transition: 0.2s;
         }
 
-        .btn-primary { 
-            background: var(--grad); 
-            color: #ffffff; 
-            box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.5);
-        }
-
-        .btn:active { transform: scale(0.98); }
-
-        .btn:disabled {
-            background: #475569 !important;
-            opacity: 0.6;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+        .btn-primary { background: var(--grad); color: white; }
+        .btn:disabled { background: #475569 !important; opacity: 0.5; }
 
         .theme-toggle {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             color: var(--accent);
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            width: 44px; height: 44px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
         }
-
-        /* Секция рулетки */
-        .wheel-box {
-            background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 100%);
-            text-align: center;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-        }
-
-        .wheel-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-        .wheel-desc { color: var(--text-sub); font-size: 13px; margin-bottom: 20px; }
-        #timer-text { font-size: 12px; margin-top: 12px; font-weight: 500; }
-
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="brand">
-            <h2>Zuu VPN Premium</h2>
-            <div class="status-pill">
-                <i class="fas fa-shield-alt"></i> Защищенное соединение
-            </div>
-        </div>
-        <button class="theme-toggle" onclick="toggleTheme()">
-            <i class="fas fa-moon" id="theme-icon"></i>
-        </button>
+        <div class="brand"><h2>Zuu VPN</h2></div>
+        <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i></button>
     </div>
 
     <div class="card">
-        <div class="info-row">
-            <span class="label"><i class="fas fa-user-circle"></i> Аккаунт ID</span>
-            <span class="value" id="u-id">...</span>
-        </div>
-        <div class="info-row">
-            <span class="label"><i class="fas fa-credit-card"></i> Текущий баланс</span>
-            <span class="value" id="u-bal" style="color: var(--success);">0₽</span>
-        </div>
-        <div class="info-row">
-            <span class="label"><i class="fas fa-clock"></i> Подписка до</span>
-            <span class="value" id="u-exp">...</span>
-        </div>
+        <div class="info-row"><span class="label">ID</span> <span class="value" id="u-id">...</span></div>
+        <div class="info-row"><span class="label">Баланс</span> <span class="value" id="u-bal">0₽</span></div>
+        <div class="info-row"><span class="label">Истекает</span> <span class="value" id="u-exp">...</span></div>
     </div>
 
-    <div class="card wheel-box">
-        <div class="wheel-title">🎁 Lucky Wheel</div>
-        <div class="wheel-desc">Испытай удачу и получи бонус к подписке</div>
-        
-        <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">
-            КРУТИТЬ БОНУС
-        </button>
-        <div id="timer-text">Загрузка...</div>
+    <div class="card" style="text-align: center;">
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <div id="wheel">
+                <div class="wheel-label" style="transform: rotate(-22.5deg);">💰</div>
+                <div class="wheel-label" style="transform: rotate(22.5deg);">❌</div>
+                <div class="wheel-label" style="transform: rotate(67.5deg);">📅</div>
+                <div class="wheel-label" style="transform: rotate(112.5deg);">❌</div>
+                <div class="wheel-label" style="transform: rotate(157.5deg);">💰</div>
+                <div class="wheel-label" style="transform: rotate(202.5deg);">❌</div>
+                <div class="wheel-label" style="transform: rotate(247.5deg);">📅</div>
+                <div class="wheel-label" style="transform: rotate(292.5deg);">❌</div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">ПОЛУЧИТЬ БОНУС</button>
+        <div id="timer-text" style="margin-top: 15px; font-size: 13px; color: var(--text-sub);"></div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
         const params = new URLSearchParams(window.location.search);
         const lastSpin = parseFloat(params.get('ls')) || 0;
-        const cooldownSeconds = 518400; // 6 дней
+        const cooldown = 518400; // 6 дней
+        
+        let isSpinning = false;
 
-        // Данные профиля
-        document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
+        document.getElementById('u-id').innerText = params.get('id') || '0';
         document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-        document.getElementById('u-exp').innerText = params.get('exp') || 'Нет активной';
+        document.getElementById('u-exp').innerText = params.get('exp') || 'Нет';
 
         function updateTimer() {
             const btn = document.getElementById('spin-btn');
             const timerText = document.getElementById('timer-text');
             const now = Math.floor(Date.now() / 1000);
-            const timeLeft = (lastSpin + cooldownSeconds) - now;
+            const timeLeft = (lastSpin + cooldown) - now;
 
             if (timeLeft > 0) {
                 btn.disabled = true;
                 const d = Math.floor(timeLeft / 86400);
                 const h = Math.floor((timeLeft % 86400) / 3600);
-                const m = Math.floor((timeLeft % 3600) / 60);
-                
-                btn.innerText = `ДОСТУПНО ЧЕРЕЗ ${d}Д ${h}Ч`;
-                timerText.style.color = "var(--text-sub)";
-                timerText.innerHTML = `<i class="fas fa-lock"></i> Следующая попытка через ${d}д ${h}ч ${m}м`;
+                timerText.innerHTML = `<i class="fas fa-lock"></i> Бонус будет доступен через ${d}д ${h}ч`;
                 return true;
-            } else {
-                btn.disabled = false;
-                btn.innerText = "ПОЛУЧИТЬ БОНУС";
-                timerText.style.color = "var(--success)";
-                timerText.innerHTML = `<i class="fas fa-check-circle"></i> Можно крутить!`;
-                return false;
             }
+            btn.disabled = false;
+            timerText.innerHTML = "Попробуй свою удачу!";
+            return false;
         }
 
         function startSpin() {
-            if (updateTimer()) return;
+            if (isSpinning || updateTimer()) return;
+            
+            isSpinning = true;
             const btn = document.getElementById('spin-btn');
+            const wheel = document.getElementById('wheel');
             btn.disabled = true;
-            btn.innerText = "ОЖИДАНИЕ...";
 
+            // 1. Математический расчет результата
+            const rand = Math.random() * 100;
+            let resultType = 'nothing';
+            let targetRotation = 0;
+            let prizeData = { action: 'wheel_prize', type: 'nothing' };
+            let msg = "😢 Увы, сектор 'Пусто'. Попробуйте через 6 дней!";
+
+            if (rand < 10) { // Шанс 10% на деньги
+                resultType = 'money';
+                const amount = Math.floor(Math.random() * (30 - 5 + 1)) + 5;
+                prizeData = { action: 'wheel_prize', type: 'money', amount: amount };
+                msg = `🎁 Поздравляем! Вы выиграли ${amount}₽!`;
+                // Сектора с 💰: 1-й (-22.5) или 5-й (157.5)
+                targetRotation = Math.random() > 0.5 ? 22 : 202; 
+            } else if (rand < 20) { // Шанс 10% на подписку
+                resultType = 'sub';
+                const days = Math.floor(Math.random() * 3) + 1;
+                prizeData = { action: 'wheel_prize', type: 'sub', days: days };
+                msg = `📅 Ура! Вам начислено +${days} дня подписки!`;
+                // Сектора с 📅: 3-й (67.5) или 7-й (247.5)
+                targetRotation = Math.random() > 0.5 ? 112 : 292;
+            } else { // 80% Ничего
+                // Любой сектор с ❌: 45, 135, 225, 315 градусов
+                const nothingAngles = [67, 157, 247, 337];
+                targetRotation = nothingAngles[Math.floor(Math.random() * nothingAngles.length)];
+            }
+
+            // 2. Анимация (5 полных оборотов + угол до цели)
+            const extraDegrees = 1800; // 5 оборотов
+            const totalRotation = extraDegrees + (360 - targetRotation);
+            
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+
+            // 3. Завершение
             setTimeout(() => {
-                const rand = Math.random() * 100;
-                let prize = { action: 'wheel_prize', type: 'nothing' };
-                let msg = "😢 В этот раз пусто. Возвращайтесь через неделю!";
-
-                if (rand < 15) {
-                    prize = { action: 'wheel_prize', type: 'money', amount: 10 };
-                    msg = "🎁 Поздравляем! Вы выиграли 10₽!";
-                } else if (rand < 25) {
-                    prize = { action: 'wheel_prize', type: 'sub' };
-                    msg = "📅 Поздравляем! +1 день подписки добавлен!";
-                }
-
                 tg.showAlert(msg, () => {
-                    tg.sendData(JSON.stringify(prize));
-                    setTimeout(() => tg.close(), 300);
+                    tg.sendData(JSON.stringify(prizeData));
+                    tg.close();
                 });
-            }, 1500);
+            }, 4500); // Чуть дольше анимации
         }
 
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
-            const icon = document.getElementById('theme-icon');
             const isLight = document.body.classList.contains('light-mode');
-            icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+            document.getElementById('theme-icon').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
             tg.setHeaderColor(isLight ? '#f8fafc' : '#0f172a');
         }
 
-        // Запуск
         updateTimer();
-        setInterval(updateTimer, 60000);
         if (tg.colorScheme === 'light') toggleTheme();
     </script>
 </body>
