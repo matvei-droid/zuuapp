@@ -14,7 +14,6 @@
             --text-sub: #94a3b8;
             --accent: #38bdf8;
             --success: #10b981;
-            --danger: #f43f5e;
             --card-border: rgba(255, 255, 255, 0.08);
             --grad: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
         }
@@ -29,18 +28,14 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            transition: all 0.3s ease;
             overflow-x: hidden;
         }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .brand h2 { margin: 0; font-size: 24px; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
@@ -48,53 +43,42 @@
             padding: 20px;
             border: 1px solid var(--card-border);
             margin-bottom: 20px;
+            text-align: center;
         }
 
-        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--card-border); }
-        .info-row:last-child { border-bottom: none; }
-        .label { color: var(--text-sub); font-size: 14px; }
-        .value { font-weight: 700; }
-
-        /* --- Стили Рулетки --- */
+        /* --- Контейнер колеса --- */
         .wheel-container {
             position: relative;
-            width: 260px;
-            height: 260px;
-            margin: 0 auto 25px;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 20px;
         }
 
-        /* Маркер (стрелка) */
         .wheel-pointer {
             position: absolute;
-            top: -10px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%);
             width: 30px;
             height: 40px;
-            background: #ff4757;
+            background: #f43f5e;
             clip-path: polygon(100% 0, 0 0, 50% 100%);
             z-index: 10;
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
         }
 
         #wheel {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 8px solid var(--card-bg);
+            border: 5px solid var(--accent);
             position: relative;
             overflow: hidden;
             transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
-            background: conic-gradient(
-                #1e293b 0deg 45deg, #334155 45deg 90deg, 
-                #1e293b 90deg 135deg, #334155 135deg 180deg, 
-                #1e293b 180deg 225deg, #334155 225deg 270deg, 
-                #1e293b 270deg 315deg, #334155 315deg 360deg
-            );
+            background: #1e293b;
         }
 
-        .wheel-label {
+        /* Сектора с текстом */
+        .sector {
             position: absolute;
             width: 50%;
             height: 50%;
@@ -104,11 +88,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            padding-left: 60px;
+            font-size: 11px;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            box-sizing: border-box;
+            padding-left: 50px;
+            text-transform: uppercase;
         }
 
-        /* --- Кнопки --- */
+        /* Разные цвета секторов для вида */
+        .sector:nth-child(odd) { background: #1e293b; border: 1px solid rgba(56, 189, 248, 0.1); }
+        .sector:nth-child(even) { background: #334155; border: 1px solid rgba(56, 189, 248, 0.1); }
+
         .btn {
             width: 100%;
             padding: 16px;
@@ -117,66 +109,49 @@
             font-weight: 700;
             font-size: 16px;
             cursor: pointer;
-            transition: 0.2s;
+            background: var(--grad);
+            color: white;
         }
 
-        .btn-primary { background: var(--grad); color: white; }
-        .btn:disabled { background: #475569 !important; opacity: 0.5; }
-
-        .theme-toggle {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            color: var(--accent);
-            width: 44px; height: 44px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
+        .btn:disabled {
+            background: #334155 !important;
+            color: #64748b !important;
+            cursor: not-allowed;
         }
+
+        #timer-text { margin-top: 10px; font-size: 12px; color: var(--text-sub); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="brand"><h2>Zuu VPN</h2></div>
-        <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i></button>
-    </div>
-
     <div class="card">
-        <div class="info-row"><span class="label">ID</span> <span class="value" id="u-id">...</span></div>
-        <div class="info-row"><span class="label">Баланс</span> <span class="value" id="u-bal">0₽</span></div>
-        <div class="info-row"><span class="label">Истекает</span> <span class="value" id="u-exp">...</span></div>
-    </div>
-
-    <div class="card" style="text-align: center;">
         <div class="wheel-container">
             <div class="wheel-pointer"></div>
             <div id="wheel">
-                <div class="wheel-label" style="transform: rotate(-22.5deg);">💰</div>
-                <div class="wheel-label" style="transform: rotate(22.5deg);">❌</div>
-                <div class="wheel-label" style="transform: rotate(67.5deg);">📅</div>
-                <div class="wheel-label" style="transform: rotate(112.5deg);">❌</div>
-                <div class="wheel-label" style="transform: rotate(157.5deg);">💰</div>
-                <div class="wheel-label" style="transform: rotate(202.5deg);">❌</div>
-                <div class="wheel-label" style="transform: rotate(247.5deg);">📅</div>
-                <div class="wheel-label" style="transform: rotate(292.5deg);">❌</div>
+                <div class="sector" style="transform: rotate(-22.5deg) translate(-1px, -1px);"><span>Пусто</span></div>
+                <div class="sector" style="transform: rotate(22.5deg) translate(-1px, -1px);"><span>💰 30₽</span></div>
+                <div class="sector" style="transform: rotate(67.5deg) translate(-1px, -1px);"><span>Пусто</span></div>
+                <div class="sector" style="transform: rotate(112.5deg) translate(-1px, -1px);"><span>📅 3 Дня</span></div>
+                <div class="sector" style="transform: rotate(157.5deg) translate(-1px, -1px);"><span>Пусто</span></div>
+                <div class="sector" style="transform: rotate(202.5deg) translate(-1px, -1px);"><span>💰 5₽</span></div>
+                <div class="sector" style="transform: rotate(247.5deg) translate(-1px, -1px);"><span>Пусто</span></div>
+                <div class="sector" style="transform: rotate(292.5deg) translate(-1px, -1px);"><span>📅 1 День</span></div>
             </div>
         </div>
 
-        <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">ПОЛУЧИТЬ БОНУС</button>
-        <div id="timer-text" style="margin-top: 15px; font-size: 13px; color: var(--text-sub);"></div>
+        <button class="btn" id="spin-btn" onclick="startSpin()">КРУТИТЬ КОЛЕСО</button>
+        <div id="timer-text">Загрузка...</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const params = new URLSearchParams(window.location.search);
         const lastSpin = parseFloat(params.get('ls')) || 0;
-        const cooldown = 518400; // 6 дней
-        
+        const cooldown = 518400; // 6 суток
         let isSpinning = false;
 
-        document.getElementById('u-id').innerText = params.get('id') || '0';
-        document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-        document.getElementById('u-exp').innerText = params.get('exp') || 'Нет';
-
         function updateTimer() {
+            if (isSpinning) return true; // Если крутится, считаем что занято
             const btn = document.getElementById('spin-btn');
             const timerText = document.getElementById('timer-text');
             const now = Math.floor(Date.now() / 1000);
@@ -186,73 +161,60 @@
                 btn.disabled = true;
                 const d = Math.floor(timeLeft / 86400);
                 const h = Math.floor((timeLeft % 86400) / 3600);
-                timerText.innerHTML = `<i class="fas fa-lock"></i> Бонус будет доступен через ${d}д ${h}ч`;
+                btn.innerText = `ЖДАТЬ ${d}Д ${h}Ч`;
+                timerText.innerHTML = `Доступно через: ${d}д ${h}ч`;
                 return true;
+            } else {
+                btn.disabled = false;
+                btn.innerText = "КРУТИТЬ КОЛЕСО";
+                timerText.innerHTML = "🎁 Удача на вашей стороне!";
+                return false;
             }
-            btn.disabled = false;
-            timerText.innerHTML = "Попробуй свою удачу!";
-            return false;
         }
 
         function startSpin() {
+            // ЖЕСТКАЯ ПРОВЕРКА КД
             if (isSpinning || updateTimer()) return;
-            
+
             isSpinning = true;
-            const btn = document.getElementById('spin-btn');
             const wheel = document.getElementById('wheel');
+            const btn = document.getElementById('spin-btn');
             btn.disabled = true;
+            btn.innerText = "ВРАЩЕНИЕ...";
 
-            // 1. Математический расчет результата
             const rand = Math.random() * 100;
-            let resultType = 'nothing';
-            let targetRotation = 0;
-            let prizeData = { action: 'wheel_prize', type: 'nothing' };
-            let msg = "😢 Увы, сектор 'Пусто'. Попробуйте через 6 дней!";
+            let targetDeg = 0; 
+            let msg = "";
 
-            if (rand < 10) { // Шанс 10% на деньги
-                resultType = 'money';
-                const amount = Math.floor(Math.random() * (30 - 5 + 1)) + 5;
-                prizeData = { action: 'wheel_prize', type: 'money', amount: amount };
+            if (rand < 10) { // Деньги (10%)
+                const amount = Math.random() > 0.5 ? 30 : 5;
                 msg = `🎁 Поздравляем! Вы выиграли ${amount}₽!`;
-                // Сектора с 💰: 1-й (-22.5) или 5-й (157.5)
-                targetRotation = Math.random() > 0.5 ? 22 : 202; 
-            } else if (rand < 20) { // Шанс 10% на подписку
-                resultType = 'sub';
-                const days = Math.floor(Math.random() * 3) + 1;
-                prizeData = { action: 'wheel_prize', type: 'sub', days: days };
-                msg = `📅 Ура! Вам начислено +${days} дня подписки!`;
-                // Сектора с 📅: 3-й (67.5) или 7-й (247.5)
-                targetRotation = Math.random() > 0.5 ? 112 : 292;
-            } else { // 80% Ничего
-                // Любой сектор с ❌: 45, 135, 225, 315 градусов
-                const nothingAngles = [67, 157, 247, 337];
-                targetRotation = nothingAngles[Math.floor(Math.random() * nothingAngles.length)];
+                targetDeg = amount === 30 ? 22.5 : 202.5; 
+            } else if (rand < 20) { // Подписка (10%)
+                const days = Math.random() > 0.5 ? 3 : 1;
+                msg = `📅 Ура! +${days} дня подписки!`;
+                targetDeg = days === 3 ? 112.5 : 292.5;
+            } else { // Пусто (80%)
+                msg = "😢 Сектор 'Пусто'. Попробуйте через 6 дней!";
+                const sectors = [-22.5, 67.5, 157.5, 247.5];
+                targetDeg = sectors[Math.floor(Math.random() * sectors.length)];
             }
 
-            // 2. Анимация (5 полных оборотов + угол до цели)
-            const extraDegrees = 1800; // 5 оборотов
-            const totalRotation = extraDegrees + (360 - targetRotation);
-            
+            // 5 оборотов + расчет угла
+            const totalRotation = 1800 + (360 - targetDeg);
             wheel.style.transform = `rotate(${totalRotation}deg)`;
 
-            // 3. Завершение
             setTimeout(() => {
                 tg.showAlert(msg, () => {
-                    tg.sendData(JSON.stringify(prizeData));
+                    tg.sendData(JSON.stringify({action: 'wheel_prize'}));
                     tg.close();
                 });
-            }, 4500); // Чуть дольше анимации
+            }, 4200);
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const isLight = document.body.classList.contains('light-mode');
-            document.getElementById('theme-icon').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
-            tg.setHeaderColor(isLight ? '#f8fafc' : '#0f172a');
-        }
-
+        // Инициализация
         updateTimer();
-        if (tg.colorScheme === 'light') toggleTheme();
+        setInterval(updateTimer, 10000); // Проверка КД каждые 10 сек
     </script>
 </body>
 </html>
