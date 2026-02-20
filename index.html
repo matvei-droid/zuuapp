@@ -38,6 +38,7 @@
             overflow-x: hidden;
         }
 
+        /* Улучшенный заголовок */
         .header {
             display: flex;
             justify-content: space-between;
@@ -67,6 +68,7 @@
             margin-top: 4px;
         }
 
+        /* Стеклянные карточки */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
@@ -90,14 +92,7 @@
         .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 10px; }
         .value { font-weight: 700; font-size: 15px; }
 
-        /* Блок кнопок */
-        .action-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
+        /* Кнопки */
         .btn {
             display: flex;
             align-items: center;
@@ -108,19 +103,25 @@
             border-radius: 18px;
             border: none;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 16px;
             cursor: pointer;
             transition: transform 0.2s, opacity 0.2s;
         }
 
-        .btn-primary { background: var(--grad); color: #ffffff; }
-        .btn-outline { 
-            background: var(--card-bg); 
-            border: 1px solid var(--card-border); 
-            color: var(--text-main); 
+        .btn-primary { 
+            background: var(--grad); 
+            color: #ffffff; 
+            box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.5);
         }
 
-        .btn:active { transform: scale(0.96); }
+        .btn:active { transform: scale(0.98); }
+
+        .btn:disabled {
+            background: #475569 !important;
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
 
         .theme-toggle {
             background: var(--card-bg);
@@ -132,13 +133,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
         }
 
+        /* Секция рулетки */
         .wheel-box {
             background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 100%);
             text-align: center;
             border: 1px solid rgba(56, 189, 248, 0.3);
         }
+
+        .wheel-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+        .wheel-desc { color: var(--text-sub); font-size: 13px; margin-bottom: 20px; }
+        #timer-text { font-size: 12px; margin-top: 12px; font-weight: 500; }
+
     </style>
 </head>
 <body>
@@ -147,7 +155,7 @@
         <div class="brand">
             <h2>Zuu VPN Premium</h2>
             <div class="status-pill">
-                <i class="fas fa-shield-alt"></i> Защищено
+                <i class="fas fa-shield-alt"></i> Защищенное соединение
             </div>
         </div>
         <button class="theme-toggle" onclick="toggleTheme()">
@@ -161,7 +169,7 @@
             <span class="value" id="u-id">...</span>
         </div>
         <div class="info-row">
-            <span class="label"><i class="fas fa-credit-card"></i> Баланс</span>
+            <span class="label"><i class="fas fa-credit-card"></i> Текущий баланс</span>
             <span class="value" id="u-bal" style="color: var(--success);">0₽</span>
         </div>
         <div class="info-row">
@@ -170,22 +178,14 @@
         </div>
     </div>
 
-    <div class="action-grid">
-        <button class="btn btn-primary" onclick="tg.sendData(JSON.stringify({action: 'renew'}))">
-            <i class="fas fa-redo"></i> Продлить
-        </button>
-        <button class="btn btn-outline" onclick="window.open('https://t.me/zuufeedback_bot', '_blank')">
-            <i class="fas fa-headset"></i> Поддержка
-        </button>
-    </div>
-
     <div class="card wheel-box">
         <div class="wheel-title">🎁 Lucky Wheel</div>
-        <div class="wheel-desc">Испытай удачу и получи бонус</div>
+        <div class="wheel-desc">Испытай удачу и получи бонус к подписке</div>
+        
         <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">
             КРУТИТЬ БОНУС
         </button>
-        <div id="timer-text" style="font-size: 12px; margin-top: 10px;">Загрузка...</div>
+        <div id="timer-text">Загрузка...</div>
     </div>
 
     <script>
@@ -194,13 +194,13 @@
         tg.ready();
 
         const params = new URLSearchParams(window.location.search);
-        
+        const lastSpin = parseFloat(params.get('ls')) || 0;
+        const cooldownSeconds = 518400; // 6 дней
+
+        // Данные профиля
         document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
         document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
         document.getElementById('u-exp').innerText = params.get('exp') || 'Нет активной';
-
-        const lastSpin = parseFloat(params.get('ls')) || 0;
-        const cooldownSeconds = 518400; 
 
         function updateTimer() {
             const btn = document.getElementById('spin-btn');
@@ -212,12 +212,16 @@
                 btn.disabled = true;
                 const d = Math.floor(timeLeft / 86400);
                 const h = Math.floor((timeLeft % 86400) / 3600);
-                btn.innerText = `ЧЕРЕЗ ${d}Д ${h}Ч`;
-                timerText.innerHTML = `<i class="fas fa-lock"></i> Попытка доступна через ${d}д ${h}ч`;
+                const m = Math.floor((timeLeft % 3600) / 60);
+                
+                btn.innerText = `ДОСТУПНО ЧЕРЕЗ ${d}Д ${h}Ч`;
+                timerText.style.color = "var(--text-sub)";
+                timerText.innerHTML = `<i class="fas fa-lock"></i> Следующая попытка через ${d}д ${h}ч ${m}м`;
                 return true;
             } else {
                 btn.disabled = false;
                 btn.innerText = "ПОЛУЧИТЬ БОНУС";
+                timerText.style.color = "var(--success)";
                 timerText.innerHTML = `<i class="fas fa-check-circle"></i> Можно крутить!`;
                 return false;
             }
@@ -232,14 +236,14 @@
             setTimeout(() => {
                 const rand = Math.random() * 100;
                 let prize = { action: 'wheel_prize', type: 'nothing' };
-                let msg = "😢 В этот раз не повезло.";
+                let msg = "😢 В этот раз пусто. Возвращайтесь через неделю!";
 
                 if (rand < 15) {
                     prize = { action: 'wheel_prize', type: 'money', amount: 10 };
                     msg = "🎁 Поздравляем! Вы выиграли 10₽!";
                 } else if (rand < 25) {
                     prize = { action: 'wheel_prize', type: 'sub' };
-                    msg = "📅 Поздравляем! +1 день подписки!";
+                    msg = "📅 Поздравляем! +1 день подписки добавлен!";
                 }
 
                 tg.showAlert(msg, () => {
@@ -257,6 +261,7 @@
             tg.setHeaderColor(isLight ? '#f8fafc' : '#0f172a');
         }
 
+        // Запуск
         updateTimer();
         setInterval(updateTimer, 60000);
         if (tg.colorScheme === 'light') toggleTheme();
