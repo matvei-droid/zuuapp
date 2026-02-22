@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zuu VPN Premium</title>
+    <title>Zuu VPN</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <style>
         :root {
             --bg-color: #0f172a;
@@ -38,7 +41,6 @@
             overflow-x: hidden;
         }
 
-        /* Улучшенный заголовок */
         .header {
             display: flex;
             justify-content: space-between;
@@ -68,7 +70,6 @@
             margin-top: 4px;
         }
 
-        /* Стеклянные карточки */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
@@ -92,7 +93,15 @@
         .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 10px; }
         .value { font-weight: 700; font-size: 15px; }
 
-        /* Кнопки */
+        /* Карта */
+        .map-container {
+            height: 200px;
+            width: 100%;
+            border-radius: 16px;
+            margin-top: 15px;
+            border: 1px solid var(--card-border);
+        }
+
         .btn {
             display: flex;
             align-items: center;
@@ -133,20 +142,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
         }
 
-        /* Секция рулетки */
         .wheel-box {
             background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 100%);
             text-align: center;
             border: 1px solid rgba(56, 189, 248, 0.3);
         }
 
-        .wheel-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+        .wheel-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
         .wheel-desc { color: var(--text-sub); font-size: 13px; margin-bottom: 20px; }
         #timer-text { font-size: 12px; margin-top: 12px; font-weight: 500; }
-
+        
+        /* Стили для Leaflet */
+        .leaflet-container { background: transparent !important; }
+        .leaflet-vignette { pointer-events: none; }
     </style>
 </head>
 <body>
@@ -169,7 +179,7 @@
             <span class="value" id="u-id">...</span>
         </div>
         <div class="info-row">
-            <span class="label"><i class="fas fa-credit-card"></i> Текущий баланс</span>
+            <span class="label"><i class="fas fa-credit-card"></i> Баланс</span>
             <span class="value" id="u-bal" style="color: var(--success);">0₽</span>
         </div>
         <div class="info-row">
@@ -178,9 +188,16 @@
         </div>
     </div>
 
+    <div class="card">
+        <div class="wheel-title" style="text-align: left;">
+            <i class="fas fa-map-marker-alt" style="color: var(--accent);"></i> Наши сервера
+        </div>
+        <div id="map" class="map-container"></div>
+    </div>
+
     <div class="card wheel-box">
         <div class="wheel-title">🎁 Lucky Wheel</div>
-        <div class="wheel-desc">Испытай удачу и получи бонус к подписке</div>
+        <div class="wheel-desc">Получи бонус к подписке раз в неделю</div>
         
         <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">
             КРУТИТЬ БОНУС
@@ -202,6 +219,55 @@
         document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
         document.getElementById('u-exp').innerText = params.get('exp') || 'Нет активной';
 
+        // Инициализация карты
+        let map;
+        function initMap() {
+            const locations = [
+                { name: "Польша 🇵🇱", coords: [52.23, 21.01] },
+                { name: "Эстония 🇪🇪", coords: [59.43, 24.75] },
+                { name: "Финляндия 🇫🇮", coords: [60.16, 24.93] },
+                { name: "Беларусь 🇧🇾", coords: [53.90, 27.56] },
+                { name: "Швейцария 🇨🇭", coords: [46.94, 7.44] },
+                { name: "Казахстан 🇰🇿", coords: [51.16, 71.47] },
+                { name: "Германия 🇩🇪", coords: [52.52, 13.40] },
+                { name: "США 🇺🇸", coords: [38.90, -77.03] },
+                { name: "Нидерланды 🇳🇱", coords: [52.36, 4.88] },
+                { name: "Бразилия 🇧🇷", coords: [-15.79, -47.88] },
+                { name: "Испания 🇪🇸", coords: [40.41, -3.70] },
+                { name: "Турция 🇹🇷", coords: [39.93, 32.85] },
+                { name: "Франция 🇫🇷", coords: [48.85, 2.35] },
+                { name: "Португалия 🇵🇹", coords: [38.72, -9.13] },
+                { name: "Италия 🇮🇹", coords: [41.90, 12.49] },
+                { name: "Молдова 🇲🇩", coords: [47.01, 28.86] },
+                { name: "Канада 🇨🇦", coords: [45.42, -75.69] },
+                { name: "Великобритания 🇬🇧", coords: [51.50, -0.12] },
+                { name: "Украина 🇺🇦", coords: [50.45, 30.52] },
+                { name: "Австрия 🇦🇹", coords: [48.20, 16.37] },
+                { name: "Бельгия 🇧🇪", coords: [50.85, 4.35] },
+                { name: "Индия 🇮🇳", coords: [28.61, 77.20] },
+                { name: "Швеция 🇸🇪", coords: [59.32, 18.06] },
+                { name: "Болгария 🇧🇬", coords: [42.69, 23.32] },
+                { name: "Россия 🇷🇺", coords: [55.75, 37.61] }
+            ];
+
+            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([50, 15], 2);
+            
+            const isLight = document.body.classList.contains('light-mode');
+            const tileStyle = isLight ? 'light_all' : 'dark_all';
+            
+            L.tileLayer(`https://{s}.basemaps.cartocdn.com/${tileStyle}/{z}/{x}/{y}{r}.png`).addTo(map);
+
+            const dotIcon = L.divIcon({
+                className: 'map-dot',
+                html: `<div style="background:#38bdf8;width:8px;height:8px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px #38bdf8;"></div>`,
+                iconSize: [12, 12]
+            });
+
+            locations.forEach(loc => {
+                L.marker(loc.coords, { icon: dotIcon }).addTo(map).bindPopup(`<b>${loc.name}</b>`);
+            });
+        }
+
         function updateTimer() {
             const btn = document.getElementById('spin-btn');
             const timerText = document.getElementById('timer-text');
@@ -212,11 +278,8 @@
                 btn.disabled = true;
                 const d = Math.floor(timeLeft / 86400);
                 const h = Math.floor((timeLeft % 86400) / 3600);
-                const m = Math.floor((timeLeft % 3600) / 60);
-                
-                btn.innerText = `ДОСТУПНО ЧЕРЕЗ ${d}Д ${h}Ч`;
-                timerText.style.color = "var(--text-sub)";
-                timerText.innerHTML = `<i class="fas fa-lock"></i> Следующая попытка через ${d}д ${h}ч ${m}м`;
+                btn.innerText = `БЛОКИРОВКА (${d}Д ${h}Ч)`;
+                timerText.innerHTML = `<i class="fas fa-lock"></i> Доступно через ${d}д ${h}ч`;
                 return true;
             } else {
                 btn.disabled = false;
@@ -231,24 +294,24 @@
             if (updateTimer()) return;
             const btn = document.getElementById('spin-btn');
             btn.disabled = true;
-            btn.innerText = "ОЖИДАНИЕ...";
+            btn.innerText = "КРУТИМ...";
 
             setTimeout(() => {
                 const rand = Math.random() * 100;
                 let prize = { action: 'wheel_prize', type: 'nothing' };
-                let msg = "😢 В этот раз пусто. Возвращайтесь через неделю!";
+                let msg = "😢 Попробуйте в следующий раз!";
 
                 if (rand < 15) {
                     prize = { action: 'wheel_prize', type: 'money', amount: 10 };
-                    msg = "🎁 Поздравляем! Вы выиграли 10₽!";
-                } else if (rand < 25) {
+                    msg = "🎁 Вы выиграли 10₽!";
+                } else if (rand < 30) {
                     prize = { action: 'wheel_prize', type: 'sub' };
-                    msg = "📅 Поздравляем! +1 день подписки добавлен!";
+                    msg = "📅 +1 день к подписке!";
                 }
 
                 tg.showAlert(msg, () => {
                     tg.sendData(JSON.stringify(prize));
-                    setTimeout(() => tg.close(), 300);
+                    tg.close();
                 });
             }, 1500);
         }
@@ -259,11 +322,16 @@
             const isLight = document.body.classList.contains('light-mode');
             icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
             tg.setHeaderColor(isLight ? '#f8fafc' : '#0f172a');
+            
+            // Пересоздаем карту для смены стиля тайлов
+            if (map) {
+                map.remove();
+                initMap();
+            }
         }
 
-        // Запуск
         updateTimer();
-        setInterval(updateTimer, 60000);
+        setTimeout(initMap, 200);
         if (tg.colorScheme === 'light') toggleTheme();
     </script>
 </body>
