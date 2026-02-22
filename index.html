@@ -93,7 +93,6 @@
         .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 10px; }
         .value { font-weight: 700; font-size: 15px; }
 
-        /* Карта */
         .map-container {
             height: 200px;
             width: 100%;
@@ -154,9 +153,7 @@
         .wheel-desc { color: var(--text-sub); font-size: 13px; margin-bottom: 20px; }
         #timer-text { font-size: 12px; margin-top: 12px; font-weight: 500; }
         
-        /* Стили для Leaflet */
         .leaflet-container { background: transparent !important; }
-        .leaflet-vignette { pointer-events: none; }
     </style>
 </head>
 <body>
@@ -214,43 +211,42 @@
         const lastSpin = parseFloat(params.get('ls')) || 0;
         const cooldownSeconds = 518400; // 6 дней
 
-        // Данные профиля
         document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
         document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
         document.getElementById('u-exp').innerText = params.get('exp') || 'Нет активной';
 
-        // Инициализация карты
         let map;
         function initMap() {
+            // Список локаций обновлен в соответствии с вашими серверами
             const locations = [
-                { name: "Польша 🇵🇱", coords: [52.23, 21.01] },
-                { name: "Эстония 🇪🇪", coords: [59.43, 24.75] },
-                { name: "Финляндия 🇫🇮", coords: [60.16, 24.93] },
-                { name: "Беларусь 🇧🇾", coords: [53.90, 27.56] },
-                { name: "Швейцария 🇨🇭", coords: [46.94, 7.44] },
-                { name: "Казахстан 🇰🇿", coords: [51.16, 71.47] },
+                { name: "Россия 🇷🇺", coords: [55.75, 37.61] },
                 { name: "Германия 🇩🇪", coords: [52.52, 13.40] },
-                { name: "США 🇺🇸", coords: [38.90, -77.03] },
+                { name: "Финляндия 🇫🇮", coords: [60.16, 24.93] },
+                { name: "Польша 🇵🇱", coords: [52.23, 21.01] },
                 { name: "Нидерланды 🇳🇱", coords: [52.36, 4.88] },
-                { name: "Бразилия 🇧🇷", coords: [-15.79, -47.88] },
+                { name: "Швеция 🇸🇪", coords: [59.32, 18.06] },
+                { name: "Австрия 🇦🇹", coords: [48.20, 16.37] },
+                { name: "Латвия 🇱🇻", coords: [56.94, 24.10] },
+                { name: "Литва 🇱🇹", coords: [54.68, 25.27] },
+                { name: "Великобритания 🇬🇧", coords: [51.50, -0.12] },
+                { name: "Франция 🇫🇷", coords: [48.85, 2.35] },
+                { name: "Швейцария 🇨🇭", coords: [46.94, 7.44] },
+                { name: "Чехия 🇨🇿", coords: [50.07, 14.43] },
                 { name: "Испания 🇪🇸", coords: [40.41, -3.70] },
                 { name: "Турция 🇹🇷", coords: [39.93, 32.85] },
-                { name: "Франция 🇫🇷", coords: [48.85, 2.35] },
-                { name: "Португалия 🇵🇹", coords: [38.72, -9.13] },
-                { name: "Италия 🇮🇹", coords: [41.90, 12.49] },
-                { name: "Молдова 🇲🇩", coords: [47.01, 28.86] },
+                { name: "ОАЭ 🇦🇪", coords: [25.20, 55.27] },
+                { name: "Казахстан 🇰🇿", coords: [51.16, 71.47] },
+                { name: "США 🇺🇸", coords: [38.90, -77.03] },
                 { name: "Канада 🇨🇦", coords: [45.42, -75.69] },
-                { name: "Великобритания 🇬🇧", coords: [51.50, -0.12] },
-                { name: "Украина 🇺🇦", coords: [50.45, 30.52] },
-                { name: "Австрия 🇦🇹", coords: [48.20, 16.37] },
-                { name: "Бельгия 🇧🇪", coords: [50.85, 4.35] },
+                { name: "Израиль 🇮🇱", coords: [31.76, 35.21] },
                 { name: "Индия 🇮🇳", coords: [28.61, 77.20] },
-                { name: "Швеция 🇸🇪", coords: [59.32, 18.06] },
-                { name: "Болгария 🇧🇬", coords: [42.69, 23.32] },
-                { name: "Россия 🇷🇺", coords: [55.75, 37.61] }
+                { name: "Бразилия 🇧🇷", coords: [-15.79, -47.88] },
+                { name: "Корея 🇰🇷", coords: [37.56, 126.97] },
+                { name: "Япония 🇯🇵", coords: [35.67, 139.65] },
+                { name: "Австралия 🇦🇺", coords: [-35.28, 149.13] }
             ];
 
-            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([50, 15], 2);
+            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([45, 25], 2);
             
             const isLight = document.body.classList.contains('light-mode');
             const tileStyle = isLight ? 'light_all' : 'dark_all';
@@ -323,7 +319,6 @@
             icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
             tg.setHeaderColor(isLight ? '#f8fafc' : '#0f172a');
             
-            // Пересоздаем карту для смены стиля тайлов
             if (map) {
                 map.remove();
                 initMap();
