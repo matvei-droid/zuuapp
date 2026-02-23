@@ -257,6 +257,32 @@
 .support-btn:active {
     background: rgba(56, 189, 248, 0.1);
 }
+/* КНОПКА ДОБАВЛЕНИЯ ПОДПИСКИ */
+.add-sub-box {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 20px;
+    display: none; /* Скрыто по умолчанию */
+}
+
+.btn-add-config {
+    background: var(--success);
+    color: #fff;
+    border: none;
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
 
     </style>
 </head>
@@ -468,8 +494,28 @@ function switchDevice(device, el) {
     const container = document.getElementById('app-list');
     container.innerHTML = '';
 
-    appData[device].forEach(app => {
+        appData[device].forEach(app => {
+        // Проверяем, активна ли подписка для показа кнопки импорта
+        const showImport = isActive ? 'block' : 'none';
+        
         container.innerHTML += `
+            <div class="app-card" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="app-icon"><i class="fas ${app.icon}"></i></div>
+                    <div class="app-info">
+                        <div class="app-name">${app.name}</div>
+                        <div class="app-ver">${app.ver}</div>
+                    </div>
+                    <a href="${app.link}" target="_blank" class="dl-link" style="background: var(--card-bg); color: var(--text-main); border: 1px solid var(--card-border); box-shadow: none;">Скачать</a>
+                </div>
+                
+                <button class="btn-add-config" style="display: ${showImport};" onclick="importConfig('${app.name}')">
+                    <i class="fas fa-plus-circle"></i> Подключить подписку
+                </button>
+            </div>
+        `;
+    });
+
             <div class="app-card">
                 <div class="app-icon"><i class="fas ${app.icon}"></i></div>
                 <div class="app-info">
@@ -484,6 +530,50 @@ function switchDevice(device, el) {
 
 // Запускаем Android по умолчанию
 switchDevice('android', document.querySelector('.tab-btn'));
+function importConfig(appName) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    if (!token) {
+        tg.showAlert("Ошибка: Токен не найден в ссылке");
+        return;
+    }
+
+    // Базовая ссылка на конфиг (твоя ссылка на get_vpn)
+    const configUrl = `https://kaci-uncried-camilo.ngrok-free.dev/get_vpn?token=${token}`;
+    
+    let importUrl = "";
+
+    // Формируем протоколы под разные приложения
+    switch (appName) {
+        case 'v2rayTun':
+            // v2rayTun и аналоги часто понимают прямые ссылки или через префикс v2ray-proxy://
+            importUrl = `v2ray-proxy://install-config?url=${encodeURIComponent(configUrl)}`;
+            break;
+        case 'Happ Proxy':
+            // Happ Proxy использует формат happ://
+            importUrl = `happ://import/${configUrl.replace('https://', '')}`;
+            break;
+        case 'Streisand':
+            importUrl = `streisand://import/${encodeURIComponent(configUrl)}`;
+            break;
+        case 'v2rayN':
+            // Для ПК обычно просто копируют в буфер, так как протоколы в браузере не всегда подхвачены
+            navigator.clipboard.writeText(configUrl);
+            tg.showAlert("Ссылка скопирована! Вставьте её в v2rayN через 'Add subscription'");
+            return;
+        default:
+            importUrl = configUrl;
+    }
+
+    // Пытаемся открыть ссылку
+    window.location.href = importUrl;
+    
+    // Резервное копирование в буфер
+    navigator.clipboard.writeText(configUrl);
+    tg.showScanQrPopup({ text: "Настройка отправлена в приложение" });
+    setTimeout(() => tg.closeScanQrPopup(), 2000);
+}
     </script>
 </body>
 </html>
