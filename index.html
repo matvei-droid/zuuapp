@@ -304,20 +304,29 @@
             КРУТИТЬ БОНУС
         </button>
         <div id="timer-text">Загрузка...</div>
-        <div class="section-title">Установка приложений</div>
-
-<div class="device-tabs">
-    <button class="tab-btn active" onclick="switchDevice('android', this)">Android</button>
-    <button class="tab-btn" onclick="switchDevice('ios', this)">iOS</button>
-    <button class="tab-btn" onclick="switchDevice('pc', this)">Desktop</button>
-</div>
-
-<div id="app-list">
     </div>
 
-<a href="https://t.me/zuufeedback_bot" target="_blank" class="support-btn">
-    <i class="fas fa-headset"></i> Поддержка: @zuufeedback_bot
-</a>
+    <div class="card">
+        <div class="section-title" style="margin-top: 5px;">Установка приложений</div>
+        <div class="device-tabs">
+            <button class="tab-btn active" onclick="switchDevice('android', this)">Android</button>
+            <button class="tab-btn" onclick="switchDevice('ios', this)">iOS</button>
+            <button class="tab-btn" onclick="switchDevice('pc', this)">Desktop</button>
+        </div>
+
+        <div id="app-list">
+            </div>
+
+        <a href="https://t.me/zuufeedback_bot" target="_blank" class="support-btn">
+            <i class="fas fa-headset"></i> Поддержка: @zuufeedback_bot
+        </a>
+
+
+    
+
+
+    
+
     </div>
 
     <script>
@@ -458,6 +467,42 @@
     pc: [
         { name: 'v2rayN', ver: 'Windows x64', icon: 'fa-desktop', link: 'https://github.com/2dust/v2rayN/releases' }
     ]
+};
+// Функция для отрисовки списка приложений
+function renderApps(platform) {
+    const listContainer = document.getElementById('app-list');
+    listContainer.innerHTML = ''; // Очищаем список
+
+    appData[platform].forEach(app => {
+        const appHtml = `
+            <div class="app-card">
+                <div class="app-icon">
+                    <i class="fas ${app.icon}"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div class="app-name">${app.name}</div>
+                    <div class="app-ver">${app.ver}</div>
+                </div>
+                <a href="${app.link}" target="_blank" class="dl-link">Скачать</a>
+            </div>
+        `;
+        listContainer.innerHTML += appHtml;
+    });
+}
+
+// Функция переключения табов
+function switchDevice(platform, btn) {
+    // Убираем активный класс у всех кнопок
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    // Добавляем нажатой кнопке
+    btn.classList.add('active');
+    // Обновляем список приложений
+    renderApps(platform);
+}
+
+// Инициализация (чтобы при загрузке сразу показывало Android)
+window.onload = () => {
+    renderApps('android');
 };
 
     </script>
