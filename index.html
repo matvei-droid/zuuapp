@@ -3,270 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zuu VPN Premium</title>
+    <title>Zuu VPN</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
+
         :root {
-            --bg-color: #0b0f1a;
-            --card-bg: #161c2d;
+            --bg-color: #0b0f17;
+            --card-bg: #161b26;
+            --accent: #38bdf8;
             --text-main: #ffffff;
             --text-sub: #94a3b8;
-            --accent: #38bdf8;
-            --success: #10b981;
-            --card-border: rgba(255, 255, 255, 0.08);
-            --grad: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            --border: rgba(255, 255, 255, 0.05);
+            --red: #ff4d4d;
+            --green: #10b981;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Manrope', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 16px;
-            padding-bottom: 40px;
+            padding-bottom: 50px;
         }
 
-        /* Header & Status */
-        .status-card {
+        /* CISVPN USER PANEL */
+        .user-panel {
             background: var(--card-bg);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 20px;
-            border: 1px solid var(--card-border);
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
         }
 
-        .user-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 15px;
+        .user-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .user-avatar { 
+            width: 48px; height: 48px; background: #1f2633; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            border: 1px solid var(--red); color: var(--red); font-size: 20px;
         }
+        .user-name { font-weight: 800; font-size: 18px; }
 
-        .info-box {
-            background: rgba(255,255,255,0.03);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-card { background: #1f2633; border-radius: 16px; padding: 12px; border: 1px solid var(--border); }
+        .stat-label { color: var(--text-sub); font-size: 11px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+        .stat-value { font-weight: 700; font-size: 14px; }
+
+        /* MAP */
+        .map-box { 
+            height: 220px; border-radius: 20px; border: 1px solid var(--border); 
+            margin-bottom: 20px; overflow: hidden;
         }
+        #map { height: 100%; width: 100%; }
 
-        .label { font-size: 10px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
-        .value { font-size: 14px; font-weight: 700; display: block; margin-top: 2px; }
-
-        /* Map Section */
-        .map-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 12px;
-            border: 1px solid var(--card-border);
-            margin-bottom: 16px;
-        }
-
-        #map { height: 200px; border-radius: 12px; width: 100%; }
-
-        /* Lucky Wheel Section */
+        /* WHEEL (Your Logic) */
         .wheel-card {
             background: linear-gradient(180deg, rgba(56, 189, 248, 0.1) 0%, var(--card-bg) 100%);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid var(--accent);
-            margin-bottom: 16px;
+            border-radius: 24px; padding: 20px; text-align: center; border: 1px solid var(--accent); margin-bottom: 25px;
         }
-
-        /* Platform Selector (CisVPN style) */
-        .platform-selector {
-            display: flex;
-            background: var(--card-bg);
-            padding: 4px;
-            border-radius: 12px;
-            gap: 4px;
-            margin-bottom: 12px;
-        }
-
-        .p-btn {
-            flex: 1; padding: 10px; border: none; background: transparent; color: var(--text-sub);
-            border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.3s;
-        }
-
-        .p-btn.active { background: var(--accent); color: #000; }
-
-        /* Apps list */
-        .app-item {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-            border: 1px solid var(--card-border);
-        }
-
-        .app-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #1e293b; border-radius: 8px; color: var(--accent); }
-        .app-details { flex: 1; }
-        .app-name { font-size: 14px; font-weight: 600; }
-        .app-desc { font-size: 11px; color: var(--text-sub); }
-
-        .btn-install {
-            background: rgba(56, 189, 248, 0.1); color: var(--accent); border: none;
-            padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 12px;
-        }
-
         .btn-wheel {
-            width: 100%; background: var(--grad); color: #fff; border: none;
-            padding: 14px; border-radius: 14px; font-weight: 800; font-size: 15px; margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+            width: 100%; background: var(--accent); color: #000; border: none;
+            padding: 16px; border-radius: 16px; font-weight: 800; font-size: 16px; margin-top: 15px;
         }
 
-        .btn-wheel:disabled { background: #334155; box-shadow: none; opacity: 0.6; }
+        /* INSTALLATION (CisVPN Tab Style) */
+        .section-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; }
+        
+        .tab-scroller { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
+        .tab-scroller::-webkit-scrollbar { display: none; }
+        
+        .app-tab { 
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px 20px; color: var(--text-sub); font-weight: 700; white-space: nowrap;
+        }
+        .app-tab.active { background: rgba(56, 189, 248, 0.1); border-color: var(--accent); color: var(--accent); }
+
+        .install-card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 20px;
+        }
+        .btn-action {
+            width: 100%; padding: 14px; border-radius: 14px; border: none; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px;
+        }
+        .btn-grey { background: #232a35; color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.2); }
+        .btn-blue { background: rgba(56, 189, 248, 0.1); color: var(--accent); }
+
+        .leaflet-container { background: #0b0f17 !important; }
     </style>
 </head>
 <body>
 
-    <div class="status-card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 18px; font-weight: 800;">Zuu <span style="color:var(--accent)">VPN</span></span>
-            <span id="sub-status" style="color: var(--success); font-size: 12px; font-weight: 700;">● Подписка активна</span>
+    <div class="user-panel">
+        <div class="user-header">
+            <div class="user-avatar"><i class="fas fa-times"></i></div>
+            <div>
+                <div class="user-name" id="u-name">user_loading...</div>
+                <div style="font-size: 12px; color: var(--text-sub);">Статус: <span id="status-text" style="color: var(--red);">Неактивна</span></div>
+            </div>
         </div>
-        <div class="user-info">
-            <div class="info-box"><span class="label">ID Аккаунта</span><span class="value" id="u-id">...</span></div>
-            <div class="info-box"><span class="label">Баланс</span><span class="value" id="u-bal" style="color: var(--success);">0₽</span></div>
-            <div class="info-box"><span class="label">Истекает</span><span class="value" id="u-exp">...</span></div>
-            <div class="info-box"><span class="label">Трафик</span><span class="value">Безлимит</span></div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-id-badge"></i> ID</div>
+                <div class="stat-value" id="u-id">...</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-wallet"></i> Баланс</div>
+                <div class="stat-value" id="u-bal" style="color:var(--green)">0₽</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-calendar"></i> Истекает</div>
+                <div class="stat-value" id="u-exp">...</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-database"></i> Трафик</div>
+                <div class="stat-value">∞</div>
+            </div>
         </div>
     </div>
 
-    <div class="map-card">
-        <div class="label" style="margin-bottom: 8px;"><i class="fas fa-globe"></i> Наши локации</div>
-        <div id="map"></div>
-    </div>
+    <div class="section-title">Наши сервера</div>
+    <div class="map-box"><div id="map"></div></div>
 
     <div class="wheel-card">
-        <div style="font-weight: 800; font-size: 17px;">🎁 Lucky Wheel</div>
-        <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 10px;">Бонус к подписке раз в неделю</div>
+        <div style="font-weight: 800; font-size: 18px;">🎁 Lucky Wheel</div>
+        <div style="font-size: 13px; color: var(--text-sub); margin-top: 5px;">Бонус к подписке раз в неделю</div>
         <button class="btn-wheel" id="spin-btn" onclick="startSpin()">КРУТИТЬ БОНУС</button>
-        <div id="timer-text" style="font-size: 11px; margin-top: 8px; font-weight: 500;"></div>
+        <div id="timer-text" style="font-size: 12px; margin-top: 10px; color: var(--text-sub);"></div>
     </div>
 
-    <div class="label" style="margin: 0 0 10px 5px;">Установка приложения</div>
-    <div class="platform-selector">
-        <button class="p-btn active" onclick="setTab('android', this)"><i class="fab fa-android"></i> Android</button>
-        <button class="p-btn" onclick="setTab('ios', this)"><i class="fab fa-apple"></i> iOS</button>
-        <button class="p-btn" onclick="setTab('pc', this)"><i class="fas fa-desktop"></i> PC</button>
+    <div class="section-title">Установка</div>
+    <div class="tab-scroller">
+        <div class="app-tab active" onclick="setApp('v2ray', this)">v2rayNG</div>
+        <div class="app-tab" onclick="setApp('happ', this)">Happ</div>
+        <div class="app-tab" onclick="setApp('clash', this)">Clash Meta</div>
+        <div class="app-tab" onclick="setApp('ios', this)">iOS (Shadow)</div>
     </div>
 
-    <div id="app-list"></div>
+    <div id="app-details" class="install-card">
+        </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
         const params = new URLSearchParams(window.location.search);
-        document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
+        document.getElementById('u-name').innerText = params.get('id') ? 'ID: ' + params.get('id') : 'Пользователь';
+        document.getElementById('u-id').innerText = params.get('id') || '...';
         document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-        document.getElementById('u-exp').innerText = params.get('exp') || 'Нет данных';
+        document.getElementById('u-exp').innerText = params.get('exp') || 'Не активна';
 
-        // 1. КАРТА (Твой полный список стран)
+        // 1. MAP (ALL 25 LOCATIONS)
         function initMap() {
-            const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([45, 20], 2);
+            const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([40, 20], 2);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
             const locations = [
                 { name: "Россия 🇷🇺", coords: [55.75, 37.61] },
                 { name: "Германия 🇩🇪", coords: [52.52, 13.40] },
-                { name: "Нидерланды 🇳🇱", coords: [52.36, 4.88] },
-                { name: "Турция 🇹🇷", coords: [39.93, 32.85] },
-                { name: "США 🇺🇸", coords: [38.90, -77.03] },
                 { name: "Финляндия 🇫🇮", coords: [60.16, 24.93] },
-                { name: "ОАЭ 🇦🇪", coords: [25.20, 55.27] }
+                { name: "Польша 🇵🇱", coords: [52.23, 21.01] },
+                { name: "Нидерланды 🇳🇱", coords: [52.36, 4.88] },
+                { name: "Швеция 🇸🇪", coords: [59.32, 18.06] },
+                { name: "Австрия 🇦🇹", coords: [48.20, 16.37] },
+                { name: "Латвия 🇱🇻", coords: [56.94, 24.10] },
+                { name: "Литва 🇱🇹", coords: [54.68, 25.27] },
+                { name: "Великобритания 🇬🇧", coords: [51.50, -0.12] },
+                { name: "Франция 🇫🇷", coords: [48.85, 2.35] },
+                { name: "Швейцария 🇨🇭", coords: [46.94, 7.44] },
+                { name: "Чехия 🇨🇿", coords: [50.07, 14.43] },
+                { name: "Испания 🇪🇸", coords: [40.41, -3.70] },
+                { name: "Турция 🇹🇷", coords: [39.93, 32.85] },
+                { name: "ОАЭ 🇦🇪", coords: [25.20, 55.27] },
+                { name: "Казахстан 🇰🇿", coords: [51.16, 71.47] },
+                { name: "США 🇺🇸", coords: [38.90, -77.03] },
+                { name: "Канада 🇨🇦", coords: [45.42, -75.69] },
+                { name: "Израиль 🇮🇱", coords: [31.76, 35.21] },
+                { name: "Индия 🇮🇳", coords: [28.61, 77.20] },
+                { name: "Бразилия 🇧🇷", coords: [-15.79, -47.88] },
+                { name: "Корея 🇰🇷", coords: [37.56, 126.97] },
+                { name: "Япония 🇯🇵", coords: [35.67, 139.65] },
+                { name: "Австралия 🇦🇺", coords: [-35.28, 149.13] }
             ];
 
+            const dot = L.divIcon({
+                className: 'custom-dot',
+                html: `<div style="background:var(--accent); width:8px; height:8px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 10px var(--accent);"></div>`
+            });
+
             locations.forEach(loc => {
-                L.circleMarker(loc.coords, {
-                    radius: 5, fillColor: "#38bdf8", color: "#fff", weight: 1, fillOpacity: 0.8
-                }).addTo(map).bindPopup(`<b>${loc.name}</b>`);
+                L.marker(loc.coords, { icon: dot }).addTo(map).bindPopup(`<b>${loc.name}</b>`);
             });
         }
 
-        // 2. УСТАНОВКА (Проверенные ссылки)
+        // 2. APPS DATA
         const apps = {
-            android: [
-                { name: 'v2rayNG', desc: 'Классический и стабильный', icon: 'fa-robot', link: 'https://play.google.com/store/apps/details?id=com.v2ray.ang' },
-                { name: 'Hiddify Next', desc: 'Универсальный (рекомендуем)', icon: 'fa-bolt', link: 'https://play.google.com/store/apps/details?id=app.hiddify.com' },
-                { name: 'ClashMeta', desc: 'Для продвинутых', icon: 'fa-shield-halved', link: 'https://github.com/MetaCubeX/ClashMetaForAndroid/releases' }
-            ],
-            ios: [
-                { name: 'Streisand', desc: 'Бесплатный и быстрый', icon: 'fa-paper-plane', link: 'https://apps.apple.com/us/app/streisand/id6450534064' },
-                { name: 'Hiddify Next', desc: 'Лучший выбор для iOS', icon: 'fa-bolt', link: 'https://apps.apple.com/us/app/hiddify-next/id6477388513' }
-            ],
-            pc: [
-                { name: 'v2rayN', desc: 'Для Windows', icon: 'fa-desktop', link: 'https://github.com/2dust/v2rayN/releases' },
-                { name: 'Hiddify Desktop', desc: 'Для Win/Mac/Linux', icon: 'fa-laptop', link: 'https://github.com/hiddify/hiddify-next/releases' },
-                { name: 'Nekoray', desc: 'Для мощных ПК', icon: 'fa-microchip', link: 'https://github.com/MatsuriDayo/nekoray/releases' }
-            ]
+            v2ray: { 
+                title: 'Установка v2rayNG', 
+                desc: 'Популярный клиент для Android. Поддерживает все современные протоколы.',
+                main: 'Google Play', link1: 'https://play.google.com/store/apps/details?id=com.v2ray.ang',
+                sec: 'Скачать APK', link2: 'https://github.com/2dust/v2rayNG/releases/latest/download/v2rayNG_arm64-v8a.apk'
+            },
+            happ: { 
+                title: 'Установка Happ', 
+                desc: 'Быстрый и современный клиент на базе Hiddify.',
+                main: 'Скачать с GitHub', link1: 'https://github.com/hiddify/hiddify-next/releases',
+                sec: 'Google Play', link2: 'https://play.google.com/store/apps/details?id=app.hiddify.com'
+            },
+            clash: { 
+                title: 'Clash Meta', 
+                desc: 'Для опытных пользователей с гибкой настройкой правил.',
+                main: 'Скачать APK', link1: 'https://github.com/MetaCubeX/ClashMetaForAndroid/releases',
+                sec: 'F-Droid', link2: 'https://f-droid.org/packages/com.github.metacubex.clash_meta/'
+            },
+            ios: { 
+                title: 'Shadowrocket / Streisand', 
+                desc: 'Лучшие клиенты для iOS. Требуют покупки или бесплатный Streisand.',
+                main: 'App Store (Shadow)', link1: 'https://apps.apple.com/app/shadowrocket/id932747118',
+                sec: 'App Store (Streisand)', link2: 'https://apps.apple.com/app/streisand/id6450534064'
+            }
         };
 
-        function setTab(p, el) {
-            document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active'));
+        function setApp(key, el) {
+            document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
-            const list = document.getElementById('app-list');
-            list.innerHTML = '';
-            apps[p].forEach(app => {
-                list.innerHTML += `
-                    <div class="app-item">
-                        <div class="app-icon"><i class="fas ${app.icon}"></i></div>
-                        <div class="app-details">
-                            <div class="app-name">${app.name}</div>
-                            <div class="app-desc">${app.desc}</div>
-                        </div>
-                        <button class="btn-install" onclick="window.open('${app.link}', '_blank')">Скачать</button>
-                    </div>
-                `;
-            });
+            const app = apps[key];
+            document.getElementById('app-details').innerHTML = `
+                <div style="font-weight:800; font-size:18px; margin-bottom:10px;">${app.title}</div>
+                <div style="font-size:13px; color:var(--text-sub); margin-bottom:20px;">${app.desc}</div>
+                <button class="btn-action btn-grey" onclick="window.open('${app.link1}')"><i class="fas fa-download"></i> ${app.main}</button>
+                <button class="btn-action btn-grey" onclick="window.open('${app.link2}')">${app.sec}</button>
+                <button class="btn-action btn-blue" style="margin-top:20px;" onclick="tg.sendData('add_sub')"><i class="fas fa-plus"></i> Добавить подписку</button>
+            `;
         }
 
-        // 3. РУЛЕТКА (Твой функционал)
+        // 3. WHEEL LOGIC
         const lastSpin = parseFloat(params.get('ls')) || 0;
         function updateTimer() {
-            const btn = document.getElementById('spin-btn');
-            const timerText = document.getElementById('timer-text');
             const now = Math.floor(Date.now() / 1000);
-            const timeLeft = (lastSpin + 518400) - now; // 6 дней
-
+            const timeLeft = (lastSpin + 518400) - now;
             if (timeLeft > 0) {
-                btn.disabled = true;
+                document.getElementById('spin-btn').disabled = true;
                 const d = Math.floor(timeLeft / 86400);
                 const h = Math.floor((timeLeft % 86400) / 3600);
-                timerText.innerText = `Доступно через ${d}д ${h}ч`;
+                document.getElementById('timer-text').innerText = `Доступно через ${d}д ${h}ч`;
             } else {
-                btn.disabled = false;
-                timerText.innerText = "Можно крутить!";
-                timerText.style.color = "var(--success)";
+                document.getElementById('timer-text').innerText = "Можно крутить!";
+                document.getElementById('timer-text').style.color = "var(--green)";
             }
         }
 
         function startSpin() {
             const btn = document.getElementById('spin-btn');
-            btn.disabled = true;
             btn.innerText = "КРУТИМ...";
             setTimeout(() => {
-                const prizes = ["📅 +1 день подписки", "🎁 Бонус 10₽", "📅 +3 дня подписки"];
-                const prize = prizes[Math.floor(Math.random()*prizes.length)];
-                tg.showAlert(`Поздравляем! ${prize}`, () => {
-                    tg.sendData(JSON.stringify({action: 'wheel_prize', prize: prize}));
+                const rand = Math.random() * 100;
+                let prize = "Попробуйте завтра";
+                if (rand < 15) prize = "🎁 +10₽ на баланс";
+                else if (rand < 30) prize = "📅 +1 день подписки";
+                tg.showAlert(prize, () => {
+                    tg.sendData(JSON.stringify({action: 'wheel', result: prize}));
                     tg.close();
                 });
             }, 1500);
         }
 
-        // Init
-        setTab('android', document.querySelector('.p-btn'));
+        // INIT
+        setApp('v2ray', document.querySelector('.app-tab'));
+        initMap();
         updateTimer();
-        setTimeout(initMap, 500);
     </script>
 </body>
 </html>
