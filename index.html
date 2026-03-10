@@ -666,36 +666,24 @@ window.onload = () => {
         }
 // Автообновление данных раз в 5 секунд
 async function autoRefresh() {
-    // Проверяем, есть ли объект TG и юзер
-    if (!window.Telegram || !window.Telegram.WebApp || !window.Telegram.WebApp.initDataUnsafe.user) {
-        console.log("TG WebApp не инициализирован");
-        return;
-    }
-
-    const uid = window.Telegram.WebApp.initDataUnsafe.user.id;
-    
+    const uid = tg.initDataUnsafe.user.id;
     try {
-        // Пробуем через HTTP и IP (так надежнее для теста)
-        const response = await fetch(`http://185.216.85.43:7654/status/${uid}`, {
-            method: 'GET',
-            cache: 'no-cache' // Чтобы не кэшировало сам ответ
-        });
-        
+        // ИСПОЛЬЗУЕМ HTTP И IP НАПРЯМУЮ (без https!)
+        const response = await fetch(`http://185.216.85.43:7654/status/${uid}`);
         const data = await response.json();
 
         if (data.balance !== undefined) {
+            // Обновляем баланс
             document.getElementById('u-bal').innerText = data.balance + '₽';
+            // Обновляем дату
             document.getElementById('u-exp').innerText = data.expires || 'Нет активной';
-            console.log("Успешное обновление! Баланс:", data.balance);
+            console.log("Данные обновлены автоматически");
         }
     } catch (e) {
-        console.error("Ошибка автообновления:", e);
+        console.log("Ошибка или блокировка запроса:", e);
     }
 }
 
-// Запуск раз в 5 секунд
-setInterval(autoRefresh, 5000);
-autoRefresh(); // И сразу при старте
 
     </script>
 </body>
