@@ -319,7 +319,17 @@
             <span class="label"><i class="fas fa-clock"></i> Подписка до</span>
             <span class="value" id="u-exp">...</span>
         </div>
+    </div> 
+
+    <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
+        <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
+            <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
+        </div>
+        <button class="btn btn-primary" onclick="importToHapp()" style="background: var(--success); box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4);">
+            <i class="fas fa-file-import"></i> ИМПОРТИРОВАТЬ В HAPP PROXY
+        </button>
     </div>
+
 
     <div class="card">
         <div class="wheel-title" style="text-align: left;">
@@ -378,17 +388,47 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+tg.expand();
+tg.ready();
 
-        const params = new URLSearchParams(window.location.search);
-        const lastSpin = parseFloat(params.get('ls')) || 0;
-        const cooldownSeconds = 518400; // 6 дней
+const params = new URLSearchParams(window.location.search);
+const userToken = params.get('token'); // Тот самый токен из URL
+const userExp = params.get('exp');     // Дата подписки
+const lastSpin = parseFloat(params.get('ls')) || 0;
+const cooldownSeconds = 518400; 
 
-        document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
-        document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-        document.getElementById('u-exp').innerText = params.get('exp') || 'Нет активной';
+// Заполнение данных
+document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
+document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
+document.getElementById('u-exp').innerText = userExp || 'Нет активной';
 
+// ЛОГИКА КНОПКИ ИМПОРТА
+function setupImportButton() {
+    const importCard = document.getElementById('import-card');
+    
+    // Условие: токен существует И подписка не пустая/не "Нет активной"
+    const hasActiveSub = userExp && userExp !== 'Нет активной' && userExp !== '...';
+    
+    if (userToken && hasActiveSub) {
+        importCard.style.display = 'block';
+    }
+}
+
+function importToHapp() {
+    if (!userToken) return;
+    
+    // Формируем ссылку динамически
+    const happUrl = `happ://add/https://zuuvpn.space/get_vpn?token=${userToken}`;
+    
+    // Вызываем вибрацию для кайфа
+    tg.HapticFeedback.notificationOccurred('success');
+    
+    // Переход
+    window.location.href = happUrl;
+}
+
+// Запускаем проверку
+setupImportButton();
         let map;
         function initMap() {
             // Список локаций обновлен в соответствии с вашими серверами
