@@ -407,36 +407,28 @@ document.getElementById('u-exp').innerText = userExp || 'Нет активной
 // ЛОГИКА КНОПКИ ИМПОРТА
 function setupImportButton() {
     const importCard = document.getElementById('import-card');
-    const happLink = document.getElementById('happ-link');
     
+    // Проверяем наличие токена и валидность подписки
     const hasActiveSub = userExp && userExp !== 'Нет активной' && userExp !== '...';
     
     if (userToken && hasActiveSub) {
-        // Сразу прописываем диплинк в атрибут href ссылки
-        const happUrl = `happ://add/https://zuuvpn.space/get_vpn?token=${userToken}`;
-        happLink.setAttribute('href', happUrl);
-        
-        // Показываем карточку
+        // Показываем карточку, если всё ок
         importCard.style.display = 'block';
-        
-        // Добавляем вибрацию при клике
-        happLink.onclick = () => {
-            tg.HapticFeedback.notificationOccurred('success');
-        };
     }
 }
-
 
 function importToHapp() {
     if (!userToken) return;
     
+    // Формируем ссылку прямо в момент нажатия
     const happUrl = `happ://add/https://zuuvpn.space/get_vpn?token=${userToken}`;
     
     tg.HapticFeedback.notificationOccurred('success');
 
-    // Ключевой метод: открывает ссылку во внешнем браузере/приложении
+    // Открываем через метод Telegram, чтобы не было уточки
     tg.openLink(happUrl);
 }
+
 
 
 
