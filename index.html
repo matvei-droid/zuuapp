@@ -389,6 +389,19 @@
     </div>
 
     <script>
+    // --- БЛОК АВТООБНОВЛЕНИЯ ПРИ ЗАПУСКЕ ---
+(function() {
+    const currentUrl = new URL(window.location.href);
+    // Если в ссылке нет параметра 'v', добавляем его и перезагружаем страницу
+    // Это заставит Telegram и браузер обновить кэш
+    if (!currentUrl.searchParams.get('v')) {
+        currentUrl.searchParams.set('v', Date.now()); // Добавляем метку времени
+        window.location.replace(currentUrl.toString());
+    }
+})();
+// ---------------------------------------
+
+
         const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
@@ -420,25 +433,13 @@ function setupImportButton() {
 function importToHapp() {
     if (!userToken) return;
     
-    // Прямая ссылка на конфиг
-    const configUrl = `https://zuuvpn.space/get_vpn?token=${userToken}`;
-    // Формируем диплинк для Happ Proxy
-    const happUrl = `happ://add/${configUrl}`;
+    // Формируем ссылку прямо в момент нажатия
+    const happUrl = `happ://add/https://zuuvpn.space/get_vpn?token=${userToken}`;
     
     tg.HapticFeedback.notificationOccurred('success');
 
-    // ХИТРЫЙ СПОСОБ: открываем через системный браузер принудительно
-    // Это закроет Mini App и откроет браузер, который сразу подхватит диплинк
-    const externalLink = document.createElement('a');
-    externalLink.href = happUrl;
-    externalLink.target = '_blank';
-    externalLink.rel = 'noopener noreferrer';
-    externalLink.click();
-
-    // Запасной вариант для новых версий ТГ
-    setTimeout(() => {
-        tg.openLink(happUrl, { try_instant_view: false });
-    }, 100);
+    // Открываем через метод Telegram, чтобы не было уточки
+    tg.openLink(happUrl);
 }
 
 
