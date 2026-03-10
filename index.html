@@ -415,13 +415,35 @@ function setupImportButton() {
 }
 
 function importToHapp() {
-    if (!userToken) return;
-    const happUrl = `happ://add/https://zuuvpn.space/get_vpn?token=${userToken}`;
-    tg.HapticFeedback.notificationOccurred('success');
+    if (!userToken) {
+        tg.showAlert("Токен не найден. Перезапустите приложение из бота.");
+        return;
+    }
     
-    // Используем метод Telegram для открытия сторонних приложений/ссылок
-    tg.openLink(happUrl); 
+    const happUrl = `happ://add/https://zuuvpn.space/get_vpn?token=${userToken}`;
+    
+    // Вибрация
+    tg.HapticFeedback.notificationOccurred('success');
+
+    // Создаем временный элемент ссылки
+    const anchor = document.createElement('a');
+    anchor.href = happUrl;
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    
+    // Имитируем нажатие
+    anchor.click();
+    
+    // Удаляем элемент
+    document.body.removeChild(anchor);
+    
+    // На всякий случай дублируем через стандартный метод, 
+    // если система поддерживает прямые диплинки
+    setTimeout(() => {
+        window.location.replace(happUrl);
+    }, 100);
 }
+
 
 
 // Запускаем проверку
