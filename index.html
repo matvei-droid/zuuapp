@@ -319,18 +319,30 @@
             <span class="label"><i class="fas fa-clock"></i> Подписка до</span>
             <span class="value" id="u-exp">...</span>
         </div>
-    </div>
+        <div style="text-align: center; margin-top: 10px;">
+             </div>
+    </div> ```
 
-    <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
-        <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
-            <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
-        </div>
-        <button class="btn btn-primary" onclick="importToHapp()" style="background: var(--success); box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4);">
-            <i class="fas fa-file-import"></i> ИМПОРТИРОВАТЬ В HAPP PROXY
-        </button>
-    </div>
+---
 
-    <div class="card">
+### Остальные моменты:
+
+1.  **Кнопка импорта:** Теперь она в отдельном блоке `import-card`. В скрипте у тебя стоит `display: block`, так что она появится. Это правильно.
+2.  **Карта:** Код инициализации `initMap` верный, список серверов на месте.
+3.  **Автообновление:** Блок с `Date.now()` в начале — отличное решение, чтобы Telegram не кэшировал старую кривую верстку.
+
+### Итог:
+Добавь один недостающий `</div>` после блока с подпиской (как я показал выше), и можно заливать на GitHub. 
+
+**Хочешь, чтобы я проверил, как кнопка импорта будет открывать приложение, или с этим уже разобрался?**
+        <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
+    <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
+        <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
+    </div>
+    <button class="btn btn-primary" onclick="importToHapp()" style="background: var(--success); box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4);">
+        <i class="fas fa-file-import"></i> ИМПОРТИРОВАТЬ В HAPP PROXY
+    </button>
+</div>
 
 
 
@@ -405,55 +417,68 @@
 
 
         const tg = window.Telegram.WebApp;
+const API_URL = "http://185.216.85.43:5000/get_user_info"; // Твой IP
+
 tg.expand();
 tg.ready();
 
 const params = new URLSearchParams(window.location.search);
-const userToken = params.get('token'); // Тот самый токен из URL
-const userExp = params.get('exp');     // Дата подписки
 const lastSpin = parseFloat(params.get('ls')) || 0;
 const cooldownSeconds = 518400; 
 
-// Заполнение данных
-document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
-document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-document.getElementById('u-exp').innerText = userExp || 'Нет активной';
+// --- ФУНКЦИЯ ЗАГРУЗКИ ИЗ ТВОЕЙ БАЗЫ ДАННЫХ ---
+async function syncProfile() {
+    // Берем ID юзера прямо из Телеграма
+    const userId = tg.initDataUnsafe.user?.id || params.get('id');
+    
+    try {
+        const response = await fetch(`${API_URL}?id=${userId}`);
+        const data = await response.json();
+
+        if (data.balance !== undefined) {
+            // Записываем данные из БД в твои ID на странице
+            document.getElementById('u-id').innerText = userId;
+            document.getElementById('u-bal').innerText = data.balance + '₽';
+            document.getElementById('u-exp').innerText = data.expires || 'Нет активной';
+            
+            // Сохраняем токен в глобальную переменную для кнопки импорта
+            window.userToken = data.token; 
+            console.log("Данные обновлены из БД VPS");
+        }
+    } catch (err) {
+        console.error("Ошибка API:", err);
+        // Если сервак упал, показываем хотя бы то, что пришло в ссылке
+        document.getElementById('u-id').innerText = userId || 'Ошибка';
+        document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
+        document.getElementById('u-exp').innerText = params.get('exp') || '...';
+    }
+}
+
+// Запускаем синхронизацию сразу
+syncProfile();
 
 // ЛОГИКА КНОПКИ ИМПОРТА
 function setupImportButton() {
-    const importCard = document.getElementById('import-card');
-    // Показываем карточку абсолютно всем
-    importCard.style.display = 'block';
+    document.getElementById('import-card').style.display = 'block';
 }
 
-
 function importToHapp() {
-    // 1. Проверяем текст в поле подписки
     const expDate = document.getElementById('u-exp').innerText;
-    
-    // Если там пусто, точки или написано "Нет активной"
-    if (!userToken || expDate === 'Нет' || expDate === '...' || expDate === '') {
-        tg.HapticFeedback.notificationOccurred('error'); // Вибрация ошибки
-        tg.showAlert("⚠️ Сначала купите подписку в боте, чтобы получить настройки VPN!");
-        return; // Прекращаем выполнение
+    const currentToken = window.userToken || params.get('token');
+
+    if (!currentToken || expDate === 'Нет активной' || expDate === '...' || expDate === '') {
+        tg.HapticFeedback.notificationOccurred('error');
+        tg.showAlert("⚠️ Сначала купите подписку в боте!");
+        return;
     }
     
-    // 2. Если подписка есть — погнали импортировать
-    const configUrl = `https://zuuvpn.space/get_vpn?token=${userToken}`;
+    const configUrl = `https://zuuvpn.space/get_vpn?token=${currentToken}`;
     const happUrl = `happ://add/${configUrl}`;
     
     tg.HapticFeedback.notificationOccurred('success');
-
-    // Открываем ссылку
-    const externalLink = document.createElement('a');
-    externalLink.href = happUrl;
-    externalLink.target = '_blank';
-    externalLink.click();
-
-    setTimeout(() => {
-        tg.openLink(happUrl, { try_instant_view: false });
-    }, 100);
+    tg.openLink(happUrl);
 }
+
 
 
 
