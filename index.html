@@ -322,13 +322,14 @@
     </div> 
 
         <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
-        <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
-            <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
-        </div>
-        <a id="happ-link" href="#" class="btn btn-primary" style="background: var(--success); box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4); text-decoration: none;">
-            <i class="fas fa-file-import"></i> ИМПОРТИРОВАТЬ В HAPP PROXY
-        </a>
+    <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
+        <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
     </div>
+    <button class="btn btn-primary" onclick="importToHapp()" style="background: var(--success); box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4);">
+        <i class="fas fa-file-import"></i> ИМПОРТИРОВАТЬ В HAPP PROXY
+    </button>
+</div>
+
 
 
 
@@ -427,33 +428,14 @@ function setupImportButton() {
 
 
 function importToHapp() {
-    if (!userToken) {
-        tg.showAlert("Токен не найден. Перезапустите приложение из бота.");
-        return;
-    }
+    if (!userToken) return;
     
     const happUrl = `happ://add/https://zuuvpn.space/get_vpn?token=${userToken}`;
     
-    // Вибрация
     tg.HapticFeedback.notificationOccurred('success');
 
-    // Создаем временный элемент ссылки
-    const anchor = document.createElement('a');
-    anchor.href = happUrl;
-    anchor.style.display = 'none';
-    document.body.appendChild(anchor);
-    
-    // Имитируем нажатие
-    anchor.click();
-    
-    // Удаляем элемент
-    document.body.removeChild(anchor);
-    
-    // На всякий случай дублируем через стандартный метод, 
-    // если система поддерживает прямые диплинки
-    setTimeout(() => {
-        window.location.replace(happUrl);
-    }, 100);
+    // Ключевой метод: открывает ссылку во внешнем браузере/приложении
+    tg.openLink(happUrl);
 }
 
 
