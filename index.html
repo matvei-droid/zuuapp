@@ -432,7 +432,7 @@ function importToHapp() {
     const expDate = document.getElementById('u-exp').innerText;
     
     // Если там пусто, точки или написано "Нет активной"
-    if (!userToken || expDate === 'Нет активной' || expDate === '...' || expDate === '') {
+    if (!userToken || expDate === 'Нет' || expDate === '...' || expDate === '') {
         tg.HapticFeedback.notificationOccurred('error'); // Вибрация ошибки
         tg.showAlert("⚠️ Сначала купите подписку в боте, чтобы получить настройки VPN!");
         return; // Прекращаем выполнение
