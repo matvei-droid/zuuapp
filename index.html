@@ -319,6 +319,11 @@
             <span class="label"><i class="fas fa-clock"></i> Подписка до</span>
             <span class="value" id="u-exp">...</span>
         </div>
+        <div style="text-align: center; margin-top: 10px;">
+    <button onclick="window.location.reload();" style="background: none; border: none; color: var(--accent); cursor: pointer; font-size: 13px; font-weight: 600;">
+        <i class="fas fa-sync-alt"></i> ОБНОВИТЬ ДАННЫЕ
+    </button>
+</div>
     </div> 
 
         <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
@@ -420,36 +425,34 @@ document.getElementById('u-exp').innerText = userExp || 'Нет активной
 // ЛОГИКА КНОПКИ ИМПОРТА
 function setupImportButton() {
     const importCard = document.getElementById('import-card');
-    
-    // Проверяем наличие токена и валидность подписки
-    const hasActiveSub = userExp && userExp !== 'Нет активной' && userExp !== '...';
-    
-    if (userToken && hasActiveSub) {
-        // Показываем карточку, если всё ок
-        importCard.style.display = 'block';
-    }
+    // Показываем карточку абсолютно всем
+    importCard.style.display = 'block';
 }
 
 
 function importToHapp() {
-    if (!userToken) return;
+    // 1. Проверяем текст в поле подписки
+    const expDate = document.getElementById('u-exp').innerText;
     
-    // Прямая ссылка на конфиг
+    // Если там пусто, точки или написано "Нет активной"
+    if (!userToken || expDate === 'Нет активной' || expDate === '...' || expDate === '') {
+        tg.HapticFeedback.notificationOccurred('error'); // Вибрация ошибки
+        tg.showAlert("⚠️ Сначала купите подписку в боте, чтобы получить настройки VPN!");
+        return; // Прекращаем выполнение
+    }
+    
+    // 2. Если подписка есть — погнали импортировать
     const configUrl = `https://zuuvpn.space/get_vpn?token=${userToken}`;
-    // Формируем диплинк для Happ Proxy
     const happUrl = `happ://add/${configUrl}`;
     
     tg.HapticFeedback.notificationOccurred('success');
 
-    // ХИТРЫЙ СПОСОБ: открываем через системный браузер принудительно
-    // Это закроет Mini App и откроет браузер, который сразу подхватит диплинк
+    // Открываем ссылку
     const externalLink = document.createElement('a');
     externalLink.href = happUrl;
     externalLink.target = '_blank';
-    externalLink.rel = 'noopener noreferrer';
     externalLink.click();
 
-    // Запасной вариант для новых версий ТГ
     setTimeout(() => {
         tg.openLink(happUrl, { try_instant_view: false });
     }, 100);
@@ -664,8 +667,6 @@ window.onload = () => {
                 btn.disabled = false;
             }
         }
-
-
 
     </script>
 </body>
