@@ -319,30 +319,18 @@
             <span class="label"><i class="fas fa-clock"></i> Подписка до</span>
             <span class="value" id="u-exp">...</span>
         </div>
-        <div style="text-align: center; margin-top: 10px;">
-             </div>
-    </div> ```
-
----
-
-### Остальные моменты:
-
-1.  **Кнопка импорта:** Теперь она в отдельном блоке `import-card`. В скрипте у тебя стоит `display: block`, так что она появится. Это правильно.
-2.  **Карта:** Код инициализации `initMap` верный, список серверов на месте.
-3.  **Автообновление:** Блок с `Date.now()` в начале — отличное решение, чтобы Telegram не кэшировал старую кривую верстку.
-
-### Итог:
-Добавь один недостающий `</div>` после блока с подпиской (как я показал выше), и можно заливать на GitHub. 
-
-**Хочешь, чтобы я проверил, как кнопка импорта будет открывать приложение, или с этим уже разобрался?**
-        <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
-    <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
-        <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
     </div>
-    <button class="btn btn-primary" onclick="importToHapp()" style="background: var(--success); box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4);">
-        <i class="fas fa-file-import"></i> ИМПОРТИРОВАТЬ В HAPP PROXY
-    </button>
-</div>
+
+    <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
+        <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
+            <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
+        </div>
+        <button class="btn btn-primary" onclick="importToHapp()" style="background: var(--success); box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4);">
+            <i class="fas fa-file-import"></i> ИМПОРТИРОВАТЬ В HAPP PROXY
+        </button>
+    </div>
+
+    <div class="card">
 
 
 
