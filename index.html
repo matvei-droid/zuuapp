@@ -416,16 +416,13 @@ function setupImportButton() {
 
 function importToHapp() {
     if (!userToken) return;
-    
-    // Формируем ссылку динамически
     const happUrl = `happ://add/https://zuuvpn.space/get_vpn?token=${userToken}`;
-    
-    // Вызываем вибрацию для кайфа
     tg.HapticFeedback.notificationOccurred('success');
     
-    // Переход
-    window.location.href = happUrl;
+    // Используем метод Telegram для открытия сторонних приложений/ссылок
+    tg.openLink(happUrl); 
 }
+
 
 // Запускаем проверку
 setupImportButton();
