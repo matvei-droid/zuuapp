@@ -664,6 +664,27 @@ window.onload = () => {
                 btn.disabled = false;
             }
         }
+// Автообновление данных раз в 5 секунд
+async function autoRefresh() {
+    const uid = tg.initDataUnsafe.user.id;
+    try {
+        // Стучимся к твоему новому API
+        const response = await fetch(`https://zuuvpn.space:7654/status/${uid}`);
+        const data = await response.json();
+
+        if (data.balance !== undefined) {
+            // Обновляем баланс в карточке
+            document.getElementById('u-bal').innerText = data.balance + '₽';
+            // Обновляем дату подписки
+            document.getElementById('u-exp').innerText = data.expires || 'Нет активной';
+        }
+    } catch (e) {
+        console.log("Спящий режим или ошибка связи");
+    }
+}
+
+// Запуск цикла
+setInterval(autoRefresh, 5000);
 
     </script>
 </body>
