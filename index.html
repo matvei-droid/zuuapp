@@ -664,25 +664,7 @@ window.onload = () => {
                 btn.disabled = false;
             }
         }
-// Автообновление данных раз в 5 секунд
-async function autoRefresh() {
-    const uid = tg.initDataUnsafe.user.id;
-    try {
-        // ИСПОЛЬЗУЕМ HTTP И IP НАПРЯМУЮ (без https!)
-        const response = await fetch(`http://185.216.85.43:7654/status/${uid}`);
-        const data = await response.json();
 
-        if (data.balance !== undefined) {
-            // Обновляем баланс
-            document.getElementById('u-bal').innerText = data.balance + '₽';
-            // Обновляем дату
-            document.getElementById('u-exp').innerText = data.expires || 'Нет активной';
-            console.log("Данные обновлены автоматически");
-        }
-    } catch (e) {
-        console.log("Ошибка или блокировка запроса:", e);
-    }
-}
 
 
     </script>
