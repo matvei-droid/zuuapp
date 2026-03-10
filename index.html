@@ -321,9 +321,20 @@
         </div>
         <div style="text-align: center; margin-top: 10px;">
              </div>
-    </div> 
+    </div> ```
 
+---
 
+### Остальные моменты:
+
+1.  **Кнопка импорта:** Теперь она в отдельном блоке `import-card`. В скрипте у тебя стоит `display: block`, так что она появится. Это правильно.
+2.  **Карта:** Код инициализации `initMap` верный, список серверов на месте.
+3.  **Автообновление:** Блок с `Date.now()` в начале — отличное решение, чтобы Telegram не кэшировал старую кривую верстку.
+
+### Итог:
+Добавь один недостающий `</div>` после блока с подпиской (как я показал выше), и можно заливать на GitHub. 
+
+**Хочешь, чтобы я проверил, как кнопка импорта будет открывать приложение, или с этим уже разобрался?**
         <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
     <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
         <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
@@ -406,68 +417,55 @@
 
 
         const tg = window.Telegram.WebApp;
-const API_URL = "http://185.216.85.43:4655/get_user_info"; // Твой IP
-
 tg.expand();
 tg.ready();
 
 const params = new URLSearchParams(window.location.search);
+const userToken = params.get('token'); // Тот самый токен из URL
+const userExp = params.get('exp');     // Дата подписки
 const lastSpin = parseFloat(params.get('ls')) || 0;
 const cooldownSeconds = 518400; 
 
-// --- ФУНКЦИЯ ЗАГРУЗКИ ИЗ ТВОЕЙ БАЗЫ ДАННЫХ ---
-async function syncProfile() {
-    // Берем ID юзера прямо из Телеграма
-    const userId = tg.initDataUnsafe.user?.id || params.get('id');
-    
-    try {
-        const response = await fetch(`${API_URL}?id=${userId}`);
-        const data = await response.json();
-
-        if (data.balance !== undefined) {
-            // Записываем данные из БД в твои ID на странице
-            document.getElementById('u-id').innerText = userId;
-            document.getElementById('u-bal').innerText = data.balance + '₽';
-            document.getElementById('u-exp').innerText = data.expires || 'Нет активной';
-            
-            // Сохраняем токен в глобальную переменную для кнопки импорта
-            window.userToken = data.token; 
-            console.log("Данные обновлены из БД VPS");
-        }
-    } catch (err) {
-        console.error("Ошибка API:", err);
-        // Если сервак упал, показываем хотя бы то, что пришло в ссылке
-        document.getElementById('u-id').innerText = userId || 'Ошибка';
-        document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-        document.getElementById('u-exp').innerText = params.get('exp') || '...';
-    }
-}
-
-// Запускаем синхронизацию сразу
-syncProfile();
+// Заполнение данных
+document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
+document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
+document.getElementById('u-exp').innerText = userExp || 'Нет активной';
 
 // ЛОГИКА КНОПКИ ИМПОРТА
 function setupImportButton() {
-    document.getElementById('import-card').style.display = 'block';
+    const importCard = document.getElementById('import-card');
+    // Показываем карточку абсолютно всем
+    importCard.style.display = 'block';
 }
 
-function importToHapp() {
-    const expDate = document.getElementById('u-exp').innerText;
-    const currentToken = window.userToken || params.get('token');
 
-    if (!currentToken || expDate === 'Нет активной' || expDate === '...' || expDate === '') {
-        tg.HapticFeedback.notificationOccurred('error');
-        tg.showAlert("⚠️ Сначала купите подписку в боте!");
-        return;
+function importToHapp() {
+    // 1. Проверяем текст в поле подписки
+    const expDate = document.getElementById('u-exp').innerText;
+    
+    // Если там пусто, точки или написано "Нет активной"
+    if (!userToken || expDate === 'Нет активной' || expDate === '...' || expDate === '') {
+        tg.HapticFeedback.notificationOccurred('error'); // Вибрация ошибки
+        tg.showAlert("⚠️ Сначала купите подписку в боте, чтобы получить настройки VPN!");
+        return; // Прекращаем выполнение
     }
     
-    const configUrl = `https://zuuvpn.space/get_vpn?token=${currentToken}`;
+    // 2. Если подписка есть — погнали импортировать
+    const configUrl = `https://zuuvpn.space/get_vpn?token=${userToken}`;
     const happUrl = `happ://add/${configUrl}`;
     
     tg.HapticFeedback.notificationOccurred('success');
-    tg.openLink(happUrl);
-}
 
+    // Открываем ссылку
+    const externalLink = document.createElement('a');
+    externalLink.href = happUrl;
+    externalLink.target = '_blank';
+    externalLink.click();
+
+    setTimeout(() => {
+        tg.openLink(happUrl, { try_instant_view: false });
+    }, 100);
+}
 
 
 
