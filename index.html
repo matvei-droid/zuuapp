@@ -427,31 +427,29 @@ function setupImportButton() {
 
 
 function importToHapp() {
-    // 1. Проверяем текст в поле подписки
+    // 1. Получаем зашифрованную ссылку из параметров URL
+    const params = new URLSearchParams(window.location.search);
+    const encryptedLink = params.get('enc_link'); // Берем то, что прислал бот
     const expDate = document.getElementById('u-exp').innerText;
     
-    // Если там пусто, точки или написано "Нет активной"
-    if (!userToken || expDate === 'Нет активной' || expDate === '...' || expDate === '') {
-        tg.HapticFeedback.notificationOccurred('error'); // Вибрация ошибки
+    // Проверка подписки
+    if (!encryptedLink || expDate === 'Нет активной' || expDate === '...' || expDate === '') {
+        tg.HapticFeedback.notificationOccurred('error');
         tg.showAlert("⚠️ Сначала купите подписку в боте, чтобы получить настройки VPN!");
-        return; // Прекращаем выполнение
+        return;
     }
     
-    // 2. Если подписка есть — погнали импортировать
-    const configUrl = `https://zuuvpn.space/get_vpn?token=${userToken}`;
-    const happUrl = `happ://add/${configUrl}`;
+    // Если бот прислал ссылку вида happ://crypt..., используем её напрямую.
+    // Если прислал просто https (ошибка шифрования), оборачиваем в happ://add/
+    let finalUrl = encryptedLink;
+    if (!finalUrl.startsWith('happ://')) {
+        finalUrl = `happ://add/${finalUrl}`;
+    }
     
     tg.HapticFeedback.notificationOccurred('success');
 
-    // Открываем ссылку
-    const externalLink = document.createElement('a');
-    externalLink.href = happUrl;
-    externalLink.target = '_blank';
-    externalLink.click();
-
-    setTimeout(() => {
-        tg.openLink(happUrl, { try_instant_view: false });
-    }, 100);
+    // Пытаемся открыть
+    tg.openLink(finalUrl, { try_instant_view: false });
 }
 
 
