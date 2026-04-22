@@ -6,662 +6,356 @@
     <title>Zuu VPN</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --text-main: #ffffff;
-            --text-sub: #94a3b8;
-            --accent: #38bdf8;
-            --success: #10b981;
-            --card-border: rgba(255, 255, 255, 0.08);
-            --grad: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
-        }
-
-        body.light-mode {
-            --bg-color: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --text-main: #1e293b;
-            --text-sub: #64748b;
-            --accent: #0284c7;
-            --card-border: rgba(0, 0, 0, 0.05);
+            --bg-color: #f5f0e5; /* Тот самый бежевый с твоих скринов */
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #8e8e93;
+            --accent: #3b82f6; /* Синий цвет кнопок */
+            --danger: #ff3b30;
+            --tab-bg: rgba(255, 255, 255, 0.9);
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
-            transition: all 0.3s ease;
-            line-height: 1.5;
-            overflow-x: hidden;
+            padding: 0 16px 100px 16px;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            padding: 20px 0;
         }
 
-        .brand h2 {
-            margin: 0;
+        .user-greeting {
             font-size: 24px;
-            letter-spacing: -0.5px;
-            background: var(--grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            margin: 0;
         }
 
-        .status-pill {
+        /* Статус подписки (Базовый юзер) */
+        .badge {
+            background: #dbeafe;
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            padding: 4px 10px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-top: 4px;
+            gap: 5px;
         }
 
+        /* Карточки */
         .card {
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-radius: 24px;
             padding: 20px;
-            border: 1px solid var(--card-border);
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.2);
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
-        .info-row {
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        /* Элементы управления трафиком */
+        .traffic-box {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 10px;
         }
 
-        .info-row:last-child { border-bottom: none; }
-        .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 10px; }
-        .value { font-weight: 700; font-size: 15px; }
-
-        .map-container {
-            height: 200px;
-            width: 100%;
-            border-radius: 16px;
-            margin-top: 15px;
-            border: 1px solid var(--card-border);
+        .progress-container {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
         }
 
+        .progress-bar {
+            width: 45%;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 10px;
+        }
+
+        /* Кнопки */
         .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            width: 100%;
-            padding: 16px;
-            border-radius: 18px;
-            border: none;
-            font-weight: 700;
-            font-size: 16px;
             cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
+            transition: opacity 0.2s;
         }
 
-        .btn-primary { 
-            background: var(--grad); 
-            color: #ffffff; 
-            box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.5);
+        .btn:active { opacity: 0.8; }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e5e7eb;
+            color: var(--text-main);
         }
 
-        .btn:active { transform: scale(0.98); }
-
-        .btn:disabled {
-            background: #475569 !important;
-            opacity: 0.6;
-            cursor: not-allowed;
-            box-shadow: none;
+        /* Сетка для малых карточек (как на скрине Баланса) */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
-        .theme-toggle {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            color: var(--accent);
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
+        /* Bottom Navigation */
+        .nav-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 16px;
+            right: 16px;
+            background: var(--tab-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
             display: flex;
+            justify-content: space-around;
+            padding: 10px 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.5);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-        }
-
-        .wheel-box {
-            background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 100%);
-            text-align: center;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-        }
-
-        .wheel-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
-        .wheel-desc { color: var(--text-sub); font-size: 13px; margin-bottom: 20px; }
-        #timer-text { font-size: 12px; margin-top: 12px; font-weight: 500; }
-        
-        .leaflet-container { background: transparent !important; }
-        /* КРАСИВЫЙ БЛОК УСТАНОВКИ */
-        .section-title {
-    font-size: 18px;
-    font-weight: 800;
-    margin: 30px 0 15px 5px;
-    letter-spacing: -0.5px;
-}
-
-.device-tabs {
-    display: flex;
-    background: var(--card-bg);
-    padding: 6px;
-    border-radius: 18px;
-    gap: 6px;
-    margin-bottom: 20px;
-    border: 1px solid var(--card-border);
-    backdrop-filter: blur(10px);
-}
-
-.tab-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    background: transparent;
-    color: var(--text-sub);
-    border-radius: 14px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tab-btn.active {
-    background: var(--grad);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-}
-
-.app-card {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: var(--card-bg);
-    padding: 16px;
-    border-radius: 24px;
-    border: 1px solid var(--card-border);
-    margin-bottom: 12px;
-    transition: transform 0.2s;
-}
-
-.app-icon {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-    font-size: 22px;
-    border: 1px solid rgba(56, 189, 248, 0.2);
-}
-
-.app-name { font-weight: 800; font-size: 15px; margin-bottom: 2px; }
-.app-ver { font-size: 12px; color: var(--text-sub); font-weight: 500; }
-
-.dl-link {
-    background: var(--grad);
-    color: #fff;
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 14px;
-    font-size: 13px;
-    font-weight: 800;
-    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
-    transition: all 0.2s;
-    border: none;
-}
-
-.dl-link:active {
-    transform: scale(0.95);
-    box-shadow: none;
-}
-
-.support-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    background: rgba(56, 189, 248, 0.05);
-    border: 2px dashed rgba(56, 189, 248, 0.3);
-    padding: 18px;
-    border-radius: 24px;
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 800;
-    margin-top: 25px;
-    transition: all 0.2s;
-}
-
-.support-btn:active {
-    background: rgba(56, 189, 248, 0.1);
-}
-        .speedtest-box {
-            text-align: center;
-        }
-        .speed-display {
-            margin: 10px 0;
-        }
-        .speed-value {
-            font-size: 42px;
-            font-weight: 900;
-            color: var(--accent);
-            line-height: 1;
-        }
-        .speed-unit {
-            font-size: 14px;
             color: var(--text-sub);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 500;
+            flex: 1;
         }
-        .progress-container {
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-item.active i {
+            background: #eff6ff;
+            padding: 8px 16px;
+            border-radius: 16px;
+            margin-top: -4px;
+        }
+
+        /* Скрытие секций */
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Инпут промокода */
+        .promo-input {
+            background: #f9fafb;
+            border: 1px solid #f3f4f6;
+            padding: 14px;
+            border-radius: 12px;
             width: 100%;
-            height: 6px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            margin-top: 15px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: var(--grad);
-            transition: width 0.3s ease;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-size: 16px;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="brand">
-            <h2>Zuu VPN Premium</h2>
-            <div class="status-pill">
-                <i class="fas fa-shield-alt"></i> Защищенное соединение
+    <div id="home" class="page active">
+        <div class="header">
+            <div>
+                <p style="margin:0; color: var(--text-sub); font-size: 14px;">Добро пожаловать,</p>
+                <h1 class="user-greeting">Angel!</h1>
+            </div>
+            <div class="badge"><i class="fas fa-star"></i> Базовый юзер</div>
+        </div>
+
+        <div class="card">
+            <div class="traffic-box">
+                <span style="font-weight:700">Расход трафика</span>
+                <span style="color:var(--text-sub)">20 MB из ∞</span>
+            </div>
+            <div class="progress-container"><div class="progress-bar"></div></div>
+            
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 18px; margin-top: 15px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-desktop" style="color: var(--accent)"></i>
+                    <div>
+                        <div style="font-weight: 700; font-size: 14px;">Подключить устройство</div>
+                        <div style="font-size: 12px; color: var(--text-sub);">1 из 1 подключено</div>
+                    </div>
+                </div>
             </div>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()">
-            <i class="fas fa-moon" id="theme-icon"></i>
-        </button>
-    </div>
 
-    <div class="card">
-        <div class="info-row">
-            <span class="label"><i class="fas fa-user-circle"></i> Аккаунт ID</span>
-            <span class="value" id="u-id">...</span>
-        </div>
-        <div class="info-row">
-            <span class="label"><i class="fas fa-credit-card"></i> Баланс</span>
-            <span class="value" id="u-bal" style="color: var(--success);">0₽</span>
-        </div>
-        <div class="info-row">
-            <span class="label"><i class="fas fa-clock"></i> Подписка до</span>
-            <span class="value" id="u-exp">...</span>
-        </div>
-        <div style="text-align: center; margin-top: 10px;">
-             </div>
-    </div> 
-        <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
-    <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
-        <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
-    </div>
-    <button class="btn btn-primary" onclick="importToHapp()" style="background: var(--success); box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4);">
-        <i class="fas fa-file-import"></i> ИМПОРТИРОВАТЬ В HAPP PROXY
-    </button>
-</div>
-
-
-
-
-    <div class="card">
-        <div class="wheel-title" style="text-align: left;">
-            <i class="fas fa-map-marker-alt" style="color: var(--accent);"></i> Наши сервера
-        </div>
-        <div id="map" class="map-container"></div>
-    </div>
-
-    <div class="card wheel-box">
-        <div class="wheel-title">🎁 Lucky Wheel</div>
-        <div class="wheel-desc">Получи бонус к подписке раз в неделю</div>
-        
-        <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">
-            КРУТИТЬ БОНУС
-        </button>
-        <div id="timer-text">Загрузка...</div>
-    </div>
-<div class="card speedtest-box">
-        <div class="wheel-title" style="text-align: left; margin-bottom: 15px;">
-            <i class="fas fa-gauge-high" style="color: var(--accent);"></i> Тест скорости
-        </div>
-        <div class="speed-display">
-            <div class="speed-value" id="speed-mbps">0.0</div>
-            <div class="speed-unit">Мбит/с</div>
-
-        </div>
-        <div class="progress-container">
-            <div class="progress-bar" id="speed-progress"></div>
-        </div>
-        <button class="btn btn-primary" id="test-btn" onclick="runSpeedTest()" style="margin-top: 15px; background: rgba(56, 189, 248, 0.1); color: var(--accent); box-shadow: none; border: 1px solid var(--accent);">
-            НАЧАТЬ ПРОВЕРКУ
-        </button>
-    </div>
-    <div class="card">
-        <div class="section-title" style="margin-top: 5px;">Установка приложений</div>
-        <div class="device-tabs">
-            <button class="tab-btn active" onclick="switchDevice('android', this)">Android</button>
-            <button class="tab-btn" onclick="switchDevice('ios', this)">iOS</button>
-            <button class="tab-btn" onclick="switchDevice('pc', this)">Desktop</button>
-        </div>
-
-        <div id="app-list">
+        <div class="grid-2">
+            <div class="card" style="margin-bottom:0">
+                <div style="color: var(--text-sub); font-size: 12px; margin-bottom: 5px;">Тариф</div>
+                <div style="font-weight: 800;">Премиум</div>
             </div>
+            <div class="card" style="margin-bottom:0">
+                <div style="color: var(--text-sub); font-size: 12px; margin-bottom: 5px;">Осталось</div>
+                <div style="font-weight: 800; color: var(--accent);">2 дня</div>
+            </div>
+        </div>
 
-        <a href="https://t.me/zuufeedback_bot" target="_blank" class="support-btn">
-            <i class="fas fa-headset"></i> Поддержка: @zuufeedback_bot
+        <div class="card" style="border: 1px dashed var(--accent); background: #eff6ff;">
+            <div class="card-title" style="font-size: 16px;">Быстрый импорт</div>
+            <button class="btn" onclick="importConfig()">
+                <i class="fas fa-file-import"></i> Импорт в Happ Proxy
+            </button>
+            <p style="font-size: 11px; color: var(--text-sub); text-align: center; margin-top: 10px;">
+                Доступно всем пользователям Zuu VPN
+            </p>
+        </div>
+    </div>
+
+    <div id="subscription" class="page">
+        <h1 class="card-title" style="font-size: 28px; margin-top: 20px;">Подписка</h1>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <span style="font-weight: 700;">Текущий статус:</span>
+                <span style="color: var(--success); color: #10b981; font-weight: 700;">Активна</span>
+            </div>
+            <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 10px;">Ваша ссылка для подключения:</div>
+            <input class="promo-input" readonly value="https://sub.zuu.ru/v2ray/..." id="sub-link">
+            <button class="btn btn-outline" onclick="copySub()">Копировать ссылку</button>
+        </div>
+    </div>
+
+    <div id="balance" class="page">
+        <h1 class="card-title" style="font-size: 28px; margin-top: 20px;">Баланс</h1>
+        <div class="card" style="text-align: center;">
+            <div style="color: var(--text-sub); margin-bottom: 5px;">Ваш счет</div>
+            <div style="font-size: 32px; font-weight: 900;">0.00 ₽</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Пополнение</div>
+            <input type="number" class="promo-input" placeholder="Введите сумму (от 50₽)">
+            <button class="btn">Перейти к оплате</button>
+        </div>
+    </div>
+
+    <div id="referrals" class="page">
+        <h1 class="card-title" style="font-size: 28px; margin-top: 20px;">Рефералы</h1>
+        <div class="grid-2">
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 24px; font-weight: 800;">0</div>
+                <div style="font-size: 12px; color: var(--text-sub);">Всего</div>
+            </div>
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 24px; font-weight: 800; color: #10b981;">20%</div>
+                <div style="font-size: 12px; color: var(--text-sub);">Бонус</div>
+            </div>
+        </div>
+        <div class="card">
+            <button class="btn btn-outline" onclick="tg.openTelegramLink('https://t.me/share/url?url=...')">
+                <i class="fas fa-share-nodes"></i> Пригласить друга
+            </button>
+        </div>
+    </div>
+
+    <div id="support" class="page">
+        <h1 class="card-title" style="font-size: 28px; margin-top: 20px;">Поддержка</h1>
+        <div class="card" style="text-align: center; padding: 40px 20px;">
+            <i class="far fa-comments" style="font-size: 48px; color: #e5e7eb; margin-bottom: 20px;"></i>
+            <div style="color: var(--text-sub); margin-bottom: 20px;">У вас пока нет активных обращений</div>
+            <button class="btn"><i class="fas fa-plus"></i> Новый тикет</button>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <a href="javascript:void(0)" class="nav-item active" onclick="showPage('home', this)">
+            <i class="fas fa-home"></i>
+            Главная
         </a>
-
-
-    
-
-
-    
-
-    </div>
+        <a href="javascript:void(0)" class="nav-item" onclick="showPage('subscription', this)">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            Подписка
+        </a>
+        <a href="javascript:void(0)" class="nav-item" onclick="showPage('balance', this)">
+            <i class="fas fa-wallet"></i>
+            Баланс
+        </a>
+        <a href="javascript:void(0)" class="nav-item" onclick="showPage('referrals', this)">
+            <i class="fas fa-users"></i>
+            Рефералы
+        </a>
+        <a href="javascript:void(0)" class="nav-item" onclick="showPage('support', this)">
+            <i class="fas fa-comment-dots"></i>
+            Помощь
+        </a>
+    </nav>
 
     <script>
-    // --- БЛОК АВТООБНОВЛЕНИЯ ПРИ ЗАПУСКЕ ---
-(function() {
-    const currentUrl = new URL(window.location.href);
-    // Если в ссылке нет параметра 'v', добавляем его и перезагружаем страницу
-    // Это заставит Telegram и браузер обновить кэш
-    if (!currentUrl.searchParams.get('v')) {
-        currentUrl.searchParams.set('v', Date.now()); // Добавляем метку времени
-        window.location.replace(currentUrl.toString());
-    }
-})();
-// ---------------------------------------
-
-
         const tg = window.Telegram.WebApp;
-tg.expand();
-tg.ready();
+        tg.expand();
 
-const params = new URLSearchParams(window.location.search);
-const userToken = params.get('token'); // Тот самый токен из URL
-const userExp = params.get('exp');     // Дата подписки
-const lastSpin = parseFloat(params.get('ls')) || 0;
-const cooldownSeconds = 518400; 
+        function showPage(pageId, element) {
+            // Убираем активный класс со всех страниц и кнопок
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
 
-// Заполнение данных
-document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
-document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-document.getElementById('u-exp').innerText = userExp || 'Нет активной';
+            // Активируем нужную страницу и кнопку
+            document.getElementById(pageId).classList.add('active');
+            element.classList.add('active');
 
-// ЛОГИКА КНОПКИ ИМПОРТА
-function setupImportButton() {
-    const importCard = document.getElementById('import-card');
-    // Показываем карточку абсолютно всем
-    importCard.style.display = 'block';
-}
-
-
-function importToHapp() {
-    // 1. Получаем зашифрованную ссылку из параметров URL
-    const params = new URLSearchParams(window.location.search);
-    const encryptedLink = params.get('enc_link'); // Берем то, что прислал бот
-    const expDate = document.getElementById('u-exp').innerText;
-    
-    // Проверка подписки
-    if (!encryptedLink || expDate === 'Нет активной' || expDate === '...' || expDate === '') {
-        tg.HapticFeedback.notificationOccurred('error');
-        tg.showAlert("⚠️ Сначала купите подписку в боте, чтобы получить настройки VPN!");
-        return;
-    }
-    
-    // Если бот прислал ссылку вида happ://crypt..., используем её напрямую.
-    // Если прислал просто https (ошибка шифрования), оборачиваем в happ://add/
-    let finalUrl = encryptedLink;
-    if (!finalUrl.startsWith('happ://')) {
-        finalUrl = `happ://add/${finalUrl}`;
-    }
-    
-    tg.HapticFeedback.notificationOccurred('success');
-
-    // Пытаемся открыть
-    tg.openLink(finalUrl, { try_instant_view: false });
-}
-
-
-
-// Запускаем проверку
-setupImportButton();
-        let map;
-        function initMap() {
-            // Список локаций обновлен в соответствии с вашими серверами
-            const locations = [
-                { name: "Россия 🇷🇺", coords: [55.75, 37.61] },
-                { name: "Германия 🇩🇪", coords: [52.52, 13.40] },
-                { name: "Финляндия 🇫🇮", coords: [60.16, 24.93] },
-                { name: "Польша 🇵🇱", coords: [52.23, 21.01] },
-                { name: "Нидерланды 🇳🇱", coords: [52.36, 4.88] },
-                { name: "Швеция 🇸🇪", coords: [59.32, 18.06] },
-                { name: "Австрия 🇦🇹", coords: [48.20, 16.37] },
-                { name: "Латвия 🇱🇻", coords: [56.94, 24.10] },
-                { name: "Литва 🇱🇹", coords: [54.68, 25.27] },
-                { name: "Великобритания 🇬🇧", coords: [51.50, -0.12] },
-                { name: "Франция 🇫🇷", coords: [48.85, 2.35] },
-                { name: "Швейцария 🇨🇭", coords: [46.94, 7.44] },
-                { name: "Чехия 🇨🇿", coords: [50.07, 14.43] },
-                { name: "Испания 🇪🇸", coords: [40.41, -3.70] },
-                { name: "Турция 🇹🇷", coords: [39.93, 32.85] },
-                { name: "ОАЭ 🇦🇪", coords: [25.20, 55.27] },
-                { name: "Казахстан 🇰🇿", coords: [51.16, 71.47] },
-                { name: "США 🇺🇸", coords: [38.90, -77.03] },
-                { name: "Канада 🇨🇦", coords: [45.42, -75.69] },
-                { name: "Израиль 🇮🇱", coords: [31.76, 35.21] },
-                { name: "Индия 🇮🇳", coords: [28.61, 77.20] },
-                { name: "Бразилия 🇧🇷", coords: [-15.79, -47.88] },
-                { name: "Корея 🇰🇷", coords: [37.56, 126.97] },
-                { name: "Япония 🇯🇵", coords: [35.67, 139.65] },
-                { name: "Австралия 🇦🇺", coords: [-35.28, 149.13] }
-            ];
-
-            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([45, 25], 2);
-            
-            const isLight = document.body.classList.contains('light-mode');
-            const tileStyle = isLight ? 'light_all' : 'dark_all';
-            
-            L.tileLayer(`https://{s}.basemaps.cartocdn.com/${tileStyle}/{z}/{x}/{y}{r}.png`).addTo(map);
-
-            const dotIcon = L.divIcon({
-                className: 'map-dot',
-                html: `<div style="background:#38bdf8;width:8px;height:8px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px #38bdf8;"></div>`,
-                iconSize: [12, 12]
-            });
-
-            locations.forEach(loc => {
-                L.marker(loc.coords, { icon: dotIcon }).addTo(map).bindPopup(`<b>${loc.name}</b>`);
-            });
+            // Вибрация при переключении
+            tg.HapticFeedback.impactOccurred('light');
         }
 
-        function updateTimer() {
-            const btn = document.getElementById('spin-btn');
-            const timerText = document.getElementById('timer-text');
-            const now = Math.floor(Date.now() / 1000);
-            const timeLeft = (lastSpin + cooldownSeconds) - now;
-
-            if (timeLeft > 0) {
-                btn.disabled = true;
-                const d = Math.floor(timeLeft / 86400);
-                const h = Math.floor((timeLeft % 86400) / 3600);
-                btn.innerText = `БЛОКИРОВКА (${d}Д ${h}Ч)`;
-                timerText.innerHTML = `<i class="fas fa-lock"></i> Доступно через ${d}д ${h}ч`;
-                return true;
-            } else {
-                btn.disabled = false;
-                btn.innerText = "ПОЛУЧИТЬ БОНУС";
-                timerText.style.color = "var(--success)";
-                timerText.innerHTML = `<i class="fas fa-check-circle"></i> Можно крутить!`;
-                return false;
-            }
+        function importConfig() {
+            tg.HapticFeedback.notificationOccurred('success');
+            // Здесь твоя логика импорта в Happ Proxy
+            // Например: tg.openLink('happ://add/https://yourlink.com');
+            tg.showAlert("Конфигурация отправлена в Happ Proxy!");
         }
 
-        function startSpin() {
-            if (updateTimer()) return;
-            const btn = document.getElementById('spin-btn');
-            btn.disabled = true;
-            btn.innerText = "КРУТИМ...";
-
-            setTimeout(() => {
-                const rand = Math.random() * 100;
-                let prize = { action: 'wheel_prize', type: 'nothing' };
-                let msg = "😢 Попробуйте в следующий раз!";
-
-                if (rand < 15) {
-                    prize = { action: 'wheel_prize', type: 'money', amount: 10 };
-                    msg = "🎁 Вы выиграли 10₽!";
-                } else if (rand < 30) {
-                    prize = { action: 'wheel_prize', type: 'sub' };
-                    msg = "📅 +1 день к подписке!";
-                }
-
-                tg.showAlert(msg, () => {
-                    tg.sendData(JSON.stringify(prize));
-                    tg.close();
-                });
-            }, 1500);
+        function copySub() {
+            const link = document.getElementById('sub-link');
+            link.select();
+            document.execCommand('copy');
+            tg.showScanQrPopup({ text: "Ссылка скопирована!" });
+            setTimeout(() => tg.closeScanQrPopup(), 1500);
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const icon = document.getElementById('theme-icon');
-            const isLight = document.body.classList.contains('light-mode');
-            icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
-            tg.setHeaderColor(isLight ? '#f8fafc' : '#0f172a');
-            
-            if (map) {
-                map.remove();
-                initMap();
-            }
-        }
-
-        updateTimer();
-        setTimeout(initMap, 200);
-        if (tg.colorScheme === 'light') toggleTheme();
-        const appData = {
-    android: [
-        { name: 'v2rayTun', ver: 'Официальный клиент', icon: 'fa-robot', link: 'https://play.google.com/store/apps/details?id=com.v2raytun.android' },
-        { name: 'Happ Proxy', ver: 'Легкий и быстрый', icon: 'fa-bolt', link: 'https://play.google.com/store/apps/details?id=com.happproxy' }
-    ],
-    ios: [
-        { name: 'Happ Proxy', ver: 'App Store (Free)', icon: 'fa-apple', link: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215' },
-        { name: 'Streisand', ver: 'Платный (Premium)', icon: 'fa-paper-plane', link: 'https://apps.apple.com/app/streisand/id6450534064' }
-    ],
-    pc: [
-        { name: 'v2rayN', ver: 'Windows x64', icon: 'fa-desktop', link: 'https://github.com/2dust/v2rayN/releases' }
-    ]
-};
-// Функция для отрисовки списка приложений
-function renderApps(platform) {
-    const listContainer = document.getElementById('app-list');
-    listContainer.innerHTML = ''; // Очищаем список
-
-    appData[platform].forEach(app => {
-        const appHtml = `
-            <div class="app-card">
-                <div class="app-icon">
-                    <i class="fas ${app.icon}"></i>
-                </div>
-                <div style="flex: 1;">
-                    <div class="app-name">${app.name}</div>
-                    <div class="app-ver">${app.ver}</div>
-                </div>
-                <a href="${app.link}" target="_blank" class="dl-link">Скачать</a>
-            </div>
-        `;
-        listContainer.innerHTML += appHtml;
-    });
-}
-
-// Функция переключения табов
-function switchDevice(platform, btn) {
-    // Убираем активный класс у всех кнопок
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    // Добавляем нажатой кнопке
-    btn.classList.add('active');
-    // Обновляем список приложений
-    renderApps(platform);
-}
-
-// Инициализация (чтобы при загрузке сразу показывало Android)
-window.onload = () => {
-    renderApps('android');
-};
-        async function runSpeedTest() {
-            const btn = document.getElementById('test-btn');
-            const speedText = document.getElementById('speed-mbps');
-            const progressBar = document.getElementById('speed-progress');
-            
-            btn.disabled = true;
-            btn.innerText = "ЗАМЕРЯЕМ...";
-            speedText.innerText = "0.0";
-            progressBar.style.width = "0%";
-
-            // Ссылка на тестовый файл (картинка 5МБ для теста). 
-            // В идеале замените на файл на вашем сервере VPN для точности
-            const testFile = "https://upload.wikimedia.org/wikipedia/commons/3/3a/Russia_Relief_Location_map.jpg?cache=" + Math.random();
-            const fileSize = 5 * 1024 * 1024 * 8; // Примерный размер в битах
-
-            const startTime = new Date().getTime();
-            
-            try {
-                const response = await fetch(testFile);
-                const reader = response.body.getReader();
-                let loaded = 0;
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    loaded += value.length;
-                    const percent = (loaded / (5 * 1024 * 1024)) * 100;
-                    progressBar.style.width = Math.min(percent, 100) + "%";
-                }
-
-                const endTime = new Date().getTime();
-                const duration = (endTime - startTime) / 1000;
-                const speedMbps = (fileSize / duration / 1000000).toFixed(1);
-
-                speedText.innerText = speedMbps;
-                btn.innerText = "ПОВТОРИТЬ ТЕСТ";
-            } catch (e) {
-                tg.showAlert("Ошибка теста. Проверьте соединение.");
-                btn.innerText = "ОШИБКА";
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
+        // Установка цвета хедера в тон фона
+        tg.setHeaderColor('#f5f0e5');
+        tg.setBackgroundColor('#f5f0e5');
     </script>
 </body>
 </html>
