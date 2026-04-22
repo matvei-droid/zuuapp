@@ -8,38 +8,157 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #f5f0e5;
+            --bg-color: #f5f0e5; 
             --card-bg: #ffffff;
             --text-main: #1a1a1a;
             --text-sub: #8e8e93;
             --accent: #3b82f6;
-            --success: #10b981;
+            --danger: #ff3b30;
             --tab-bg: rgba(255, 255, 255, 0.9);
         }
 
         body {
-            font-family: -apple-system, system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 0 16px 100px 16px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
-        .user-greeting { font-size: 24px; font-weight: 800; margin: 0; }
-        .badge { background: #dbeafe; color: var(--accent); padding: 4px 12px; border-radius: 100px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
-        .card { background: var(--card-bg); border-radius: 24px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); }
-        .progress-container { height: 8px; background: #f0f0f0; border-radius: 10px; margin: 15px 0; overflow: hidden; }
-        .progress-bar { height: 100%; background: var(--accent); transition: width 0.5s ease; }
-        .btn { background: var(--accent); color: white; border: none; border-radius: 16px; padding: 16px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
-        .btn-outline { background: transparent; border: 1px solid #e5e7eb; color: var(--text-main); margin-top: 10px; }
-        .nav-bar { position: fixed; bottom: 20px; left: 16px; right: 16px; background: var(--tab-bg); backdrop-filter: blur(20px); border-radius: 28px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-sub); text-decoration: none; font-size: 11px; flex: 1; }
-        .nav-item.active { color: var(--accent); }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .user-greeting {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .badge {
+            background: #dbeafe;
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:active { opacity: 0.8; }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e5e7eb;
+            color: var(--text-main);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 16px;
+            right: 16px;
+            background: var(--tab-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.5);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-item.active i {
+            background: #eff6ff;
+            padding: 8px 16px;
+            border-radius: 16px;
+            margin-top: -4px;
+        }
+
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
-        .promo-input { background: #f9fafb; border: 1px solid #f3f4f6; padding: 14px; border-radius: 12px; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .promo-input {
+            background: #f9fafb;
+            border: 1px solid #f3f4f6;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -48,102 +167,87 @@
         <div class="header">
             <div>
                 <p style="margin:0; color: var(--text-sub); font-size: 14px;">Добро пожаловать,</p>
-                <h1 class="user-greeting" id="u-name">Друг</h1>
+                <h1 class="user-greeting" id="u-name-display">Angel!</h1>
             </div>
-            <div class="badge" id="u-status"><i class="fas fa-star"></i> Загрузка...</div>
+            <div class="badge"><i class="fas fa-star"></i> <span id="status-text">Базовый юзер</span></div>
         </div>
 
-        <div class="card">
-            <div style="display:flex; justify-content:space-between;">
-                <span style="font-weight:700">Трафик (GB)</span>
-                <span id="traffic-text" style="color:var(--text-sub)">0 / 0</span>
-            </div>
-            <div class="progress-container"><div class="progress-bar" id="traffic-bar" style="width: 0%"></div></div>
-            
-            <div style="background: #f9f9f9; padding: 15px; border-radius: 18px; margin-top: 15px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <i class="fas fa-desktop" style="color: var(--accent)"></i>
-                    <div>
-                        <div style="font-weight: 700; font-size: 14px;">Устройства</div>
-                        <div style="font-size: 12px; color: var(--text-sub);" id="u-devices">Проверка...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+        <div class="grid-2">
             <div class="card" style="margin-bottom:0">
-                <div style="color: var(--text-sub); font-size: 12px;">Баланс</div>
-                <div style="font-weight: 800;" id="u-bal">0.00 ₽</div>
+                <div style="color: var(--text-sub); font-size: 12px; margin-bottom: 5px;">Аккаунт ID</div>
+                <div style="font-weight: 800;" id="u-id">...</div>
             </div>
             <div class="card" style="margin-bottom:0">
-                <div style="color: var(--text-sub); font-size: 12px;">Истекает</div>
+                <div style="color: var(--text-sub); font-size: 12px; margin-bottom: 5px;">Осталось</div>
                 <div style="font-weight: 800; color: var(--accent);" id="u-exp">...</div>
             </div>
         </div>
 
         <div class="card" style="border: 1px dashed var(--accent); background: #eff6ff;">
+            <div class="card-title" style="font-size: 16px;">Быстрая настройка</div>
             <button class="btn" onclick="importToHapp()">
-                <i class="fas fa-file-import"></i> Импорт в Happ Proxy
+                <i class="fas fa-file-import"></i> ИМПОРТ В HAPP PROXY
             </button>
+            <p style="font-size: 11px; color: var(--text-sub); text-align: center; margin-top: 10px;">
+                Добавление конфигурации в одно нажатие
+            </p>
         </div>
     </div>
 
     <div id="subscription" class="page">
-        <h1 style="font-size: 24px; margin: 20px 0;">Моя подписка</h1>
+        <h1 class="card-title" style="font-size: 28px; margin-top: 20px;">Подписка</h1>
         <div class="card">
-            <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 10px;">Ваша персональная ссылка:</div>
-            <input class="promo-input" readonly id="sub-link-input" value="Загрузка...">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <span style="font-weight: 700;">Статус:</span>
+                <span id="sub-status-label" style="font-weight: 700;">...</span>
+            </div>
+            <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 10px;">Ваша ссылка для подключения:</div>
+            <input class="promo-input" readonly value="..." id="sub-link-input">
             <button class="btn btn-outline" onclick="copySub()">Копировать ссылку</button>
         </div>
     </div>
 
     <nav class="nav-bar">
-        <a href="javascript:void(0)" class="nav-item active" onclick="showPage('home', this)"><i class="fas fa-home"></i>Главная</a>
-        <a href="javascript:void(0)" class="nav-item" onclick="showPage('subscription', this)"><i class="fas fa-key"></i>Подписка</a>
+        <a href="javascript:void(0)" class="nav-item active" onclick="showPage('home', this)">
+            <i class="fas fa-home"></i>
+            Главная
+        </a>
+        <a href="javascript:void(0)" class="nav-item" onclick="showPage('subscription', this)">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            Подписка
+        </a>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.ready();
 
-        // --- ЛОГИКА ПОЛУЧЕНИЯ ДАННЫХ (как во втором примере) ---
+        // Парсинг данных из URL (твоя рабочая логика)
         const params = new URLSearchParams(window.location.search);
-        
-        // 1. Имя и ID
-        document.getElementById('u-name').innerText = tg.initDataUnsafe.user?.first_name || "Пользователь";
-        
-        // 2. Баланс и Даты
-        const balance = params.get('bal') || '0';
-        const expiry = params.get('exp') || 'Нет активной';
-        document.getElementById('u-bal').innerText = balance + ' ₽';
-        document.getElementById('u-exp').innerText = expiry;
-        
-        // 3. Статус
-        const statusBadge = document.getElementById('u-status');
-        if (expiry === 'Нет активной') {
-            statusBadge.style.background = '#fee2e2';
-            statusBadge.style.color = '#ef4444';
-            statusBadge.innerText = 'Не активен';
+        const userExp = params.get('exp');
+        const encryptedLink = params.get('enc_link');
+        const userId = params.get('id') || 'Неизвестно';
+        const userName = tg.initDataUnsafe.user?.first_name || "Angel";
+
+        // Заполнение интерфейса
+        document.getElementById('u-name-display').innerText = userName + '!';
+        document.getElementById('u-id').innerText = userId;
+        document.getElementById('u-exp').innerText = userExp || 'Нет активной';
+        document.getElementById('sub-link-input').value = encryptedLink || 'Ссылка не найдена';
+
+        // Логика статуса
+        const statusText = document.getElementById('status-text');
+        const statusLabel = document.getElementById('sub-status-label');
+        if (!userExp || userExp === 'Нет активной') {
+            statusText.innerText = "Не активен";
+            statusLabel.innerText = "Не активна";
+            statusLabel.style.color = "var(--danger)";
         } else {
-            statusBadge.innerText = 'Премиум';
+            statusText.innerText = "Premium";
+            statusLabel.innerText = "Активна";
+            statusLabel.style.color = "#10b981";
         }
-
-        // 4. Трафик (Логика: берем из параметров traffic и limit)
-        const used = parseFloat(params.get('traffic') || 0);
-        const limit = parseFloat(params.get('limit') || 100); // 100GB по дефолту
-        document.getElementById('traffic-text').innerText = `${used.toFixed(2)} / ${limit} GB`;
-        document.getElementById('traffic-bar').style.width = Math.min((used/limit)*100, 100) + '%';
-
-        // 5. Устройства (Параметр dev)
-        const devCount = params.get('dev') || '1'; 
-        document.getElementById('u-devices').innerText = `${devCount} из 3 подключено`;
-
-        // 6. Ссылка для подписки
-        const rawLink = params.get('enc_link') || '';
-        document.getElementById('sub-link-input').value = rawLink;
-
-        // --- ФУНКЦИИ ВЗАИМОДЕЙСТВИЯ ---
 
         function showPage(pageId, element) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -153,27 +257,35 @@
             tg.HapticFeedback.impactOccurred('light');
         }
 
+        // Твоя логика импорта: happ://add/ + ссылка
         function importToHapp() {
-            const link = params.get('enc_link');
-            if (!link || expiry === 'Нет активной') {
-                tg.showAlert("⚠️ У вас нет активной подписки!");
+            if (!encryptedLink || userExp === 'Нет активной') {
+                tg.HapticFeedback.notificationOccurred('error');
+                tg.showAlert("⚠️ Сначала приобретите подписку!");
                 return;
             }
+
+            let finalUrl = encryptedLink;
+            if (!finalUrl.startsWith('happ://')) {
+                finalUrl = `happ://add/${finalUrl}`;
+            }
+
             tg.HapticFeedback.notificationOccurred('success');
-            // Если ссылка уже зашифрована ботом под happ://, открываем ее
-            const finalUrl = link.startsWith('happ://') ? link : `happ://add/${link}`;
             tg.openLink(finalUrl);
         }
 
         function copySub() {
-            const input = document.getElementById('sub-link-input');
-            input.select();
-            document.execCommand('copy');
-            tg.HapticFeedback.notificationOccurred('success');
-            tg.showAlert("Ссылка скопирована!");
+            const linkInput = document.getElementById('sub-link-input');
+            if (linkInput.value === 'Ссылка не найдена') return;
+            
+            navigator.clipboard.writeText(linkInput.value).then(() => {
+                tg.HapticFeedback.notificationOccurred('success');
+                tg.showAlert("Ссылка скопирована!");
+            });
         }
 
         tg.setHeaderColor('#f5f0e5');
+        tg.setBackgroundColor('#f5f0e5');
     </script>
 </body>
 </html>
