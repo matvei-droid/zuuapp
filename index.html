@@ -5,663 +5,406 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zuu VPN</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --text-main: #ffffff;
-            --text-sub: #94a3b8;
-            --accent: #38bdf8;
-            --success: #10b981;
-            --card-border: rgba(255, 255, 255, 0.08);
-            --grad: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
-        }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    :root{
+        --bg:#070b16; --bg2:#0b1222;
+        --card:rgba(255,255,255,0.045); --card2:rgba(255,255,255,0.08);
+        --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+        --text:#f1f5f9; --sub:#9aa6bb; --dim:#64748b;
+        --accent:#38bdf8; --accent2:#0ea5e9; --indigo:#6366f1;
+        --grad:linear-gradient(135deg,#38bdf8 0%,#6366f1 100%);
+        --success:#10b981; --gold:#f59e0b;
+        --r:20px; --rsm:14px;
+    }
+    body.light-mode{
+        --bg:#eef2f8; --bg2:#ffffff; --card:rgba(255,255,255,0.75); --card2:rgba(255,255,255,0.95);
+        --border:rgba(15,23,42,0.07); --border2:rgba(15,23,42,0.12);
+        --text:#0f172a; --sub:#475569; --dim:#94a3b8;
+    }
+    body{
+        font-family:'Inter',-apple-system,sans-serif;
+        background:var(--bg); color:var(--text);
+        padding:18px 16px 40px; line-height:1.5; overflow-x:hidden;
+        -webkit-font-smoothing:antialiased; transition:background .3s;
+        min-height:100vh; position:relative;
+    }
+    body::before{
+        content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+        background:
+          radial-gradient(620px 420px at 50% -8%, rgba(99,102,241,0.20), transparent 70%),
+          radial-gradient(500px 400px at 100% 100%, rgba(56,189,248,0.12), transparent 70%);
+    }
+    .h1{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.5px;}
 
-        body.light-mode {
-            --bg-color: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --text-main: #1e293b;
-            --text-sub: #64748b;
-            --accent: #0284c7;
-            --card-border: rgba(0, 0, 0, 0.05);
-        }
+    /* HEADER */
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;}
+    .brand h2{margin:0;font-size:24px;font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.6px;
+        background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .status-pill{display:inline-flex;align-items:center;gap:7px;background:rgba(16,185,129,0.12);
+        color:var(--success);padding:5px 11px;border-radius:100px;font-size:11px;font-weight:600;margin-top:7px;
+        border:1px solid rgba(16,185,129,0.2);}
+    .pulse{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 0 0 rgba(16,185,129,.5);animation:pulse 2s infinite;}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}70%{box-shadow:0 0 0 7px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+    .theme-toggle{background:var(--card);border:1px solid var(--border);color:var(--accent);width:44px;height:44px;
+        border-radius:14px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);font-size:16px;cursor:pointer;}
+    .theme-toggle:active{transform:scale(.92);}
 
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            transition: all 0.3s ease;
-            line-height: 1.5;
-            overflow-x: hidden;
-        }
+    /* CARD */
+    .card{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+        border-radius:var(--r);padding:18px;border:1px solid var(--border);margin-bottom:16px;
+        box-shadow:0 12px 34px -16px rgba(0,0,0,.55);}
+    .card-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;display:flex;align-items:center;gap:9px;margin-bottom:14px;}
+    .card-title i{color:var(--accent);}
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
+    /* ACCOUNT */
+    .acct{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .acct-cell{background:var(--card2);border:1px solid var(--border);border-radius:var(--rsm);padding:13px 14px;}
+    .acct-cell.wide{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;}
+    .acct-l{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+    .acct-v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;}
+    .acct-cell.wide .acct-l{margin-bottom:0;}
 
-        .brand h2 {
-            margin: 0;
-            font-size: 24px;
-            letter-spacing: -0.5px;
-            background: var(--grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    /* BUTTONS */
+    .btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px;border-radius:16px;
+        border:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer;
+        transition:transform .15s,box-shadow .2s,opacity .2s;color:#fff;}
+    .btn-primary{background:var(--grad);box-shadow:0 10px 26px -8px rgba(56,189,248,.55);}
+    .btn-success{background:linear-gradient(135deg,#34d399,#059669);box-shadow:0 10px 26px -8px rgba(16,185,129,.5);}
+    .btn-soft{background:rgba(56,189,248,.1);color:var(--accent);border:1px solid rgba(56,189,248,.3);box-shadow:none;}
+    .btn:active{transform:scale(.97);}
+    .btn:disabled{background:#475569!important;color:#94a3b8!important;opacity:.7;cursor:not-allowed;box-shadow:none!important;}
 
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            padding: 4px 10px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-top: 4px;
-        }
+    /* MAP */
+    .map-container{height:200px;width:100%;border-radius:var(--rsm);border:1px solid var(--border);overflow:hidden;}
+    .leaflet-container{background:transparent!important;}
+    .servers-meta{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;color:var(--sub);}
+    .servers-meta b{color:var(--accent);font-family:'Space Grotesk',sans-serif;}
 
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 24px;
-            padding: 20px;
-            border: 1px solid var(--card-border);
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.2);
-        }
+    /* LUCKY WHEEL */
+    .wheel-card{text-align:center;background:
+        linear-gradient(180deg,rgba(99,102,241,.08),rgba(56,189,248,0) 60%),var(--card);
+        border:1px solid rgba(99,102,241,.22);}
+    .wheel-wrap{position:relative;width:230px;height:230px;margin:6px auto 14px;}
+    .wheel{width:100%;height:100%;border-radius:50%;position:relative;
+        border:6px solid rgba(255,255,255,.08);box-shadow:0 0 0 6px rgba(99,102,241,.12),0 18px 40px -12px rgba(0,0,0,.6);
+        background:conic-gradient(
+            #1e2740 0deg 45deg, #f59e0b 45deg 90deg, #1e2740 90deg 135deg, #10b981 135deg 180deg,
+            #1e2740 180deg 225deg, #f59e0b 225deg 270deg, #1e2740 270deg 315deg, #10b981 315deg 360deg);
+        will-change:transform;}
+    .wheel-seg{position:absolute;left:50%;top:8px;transform-origin:0 107px;font-size:15px;}
+    .wheel-hub{position:absolute;inset:0;margin:auto;width:54px;height:54px;border-radius:50%;
+        background:var(--bg2);border:3px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;
+        font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.5);}
+    .wheel-pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3;
+        width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:18px solid var(--accent);
+        filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));}
+    .wheel-legend{display:flex;justify-content:center;gap:14px;font-size:11px;color:var(--sub);margin-bottom:16px;flex-wrap:wrap;}
+    .wheel-legend span{display:inline-flex;align-items:center;gap:5px;}
+    .dot{width:9px;height:9px;border-radius:3px;}
+    #timer-text{font-size:12px;margin-top:12px;font-weight:500;color:var(--sub);}
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--card-border);
-        }
+    /* SPEEDTEST */
+    .speed-display{margin:6px 0 4px;}
+    .speed-value{font-family:'Space Grotesk',sans-serif;font-size:46px;font-weight:700;line-height:1;
+        background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .speed-unit{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin-top:4px;}
+    .progress-container{width:100%;height:7px;background:rgba(255,255,255,.06);border-radius:10px;margin-top:14px;overflow:hidden;}
+    .progress-bar{width:0%;height:100%;background:var(--grad);border-radius:10px;transition:width .25s ease;}
 
-        .info-row:last-child { border-bottom: none; }
-        .label { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 10px; }
-        .value { font-weight: 700; font-size: 15px; }
-
-        .map-container {
-            height: 200px;
-            width: 100%;
-            border-radius: 16px;
-            margin-top: 15px;
-            border: 1px solid var(--card-border);
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 16px;
-            border-radius: 18px;
-            border: none;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-
-        .btn-primary { 
-            background: var(--grad); 
-            color: #ffffff; 
-            box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.5);
-        }
-
-        .btn:active { transform: scale(0.98); }
-
-        .btn:disabled {
-            background: #475569 !important;
-            opacity: 0.6;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .theme-toggle {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            color: var(--accent);
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .wheel-box {
-            background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 100%);
-            text-align: center;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-        }
-
-        .wheel-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
-        .wheel-desc { color: var(--text-sub); font-size: 13px; margin-bottom: 20px; }
-        #timer-text { font-size: 12px; margin-top: 12px; font-weight: 500; }
-        
-        .leaflet-container { background: transparent !important; }
-        /* КРАСИВЫЙ БЛОК УСТАНОВКИ */
-        .section-title {
-    font-size: 18px;
-    font-weight: 800;
-    margin: 30px 0 15px 5px;
-    letter-spacing: -0.5px;
-}
-
-.device-tabs {
-    display: flex;
-    background: var(--card-bg);
-    padding: 6px;
-    border-radius: 18px;
-    gap: 6px;
-    margin-bottom: 20px;
-    border: 1px solid var(--card-border);
-    backdrop-filter: blur(10px);
-}
-
-.tab-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    background: transparent;
-    color: var(--text-sub);
-    border-radius: 14px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tab-btn.active {
-    background: var(--grad);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-}
-
-.app-card {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: var(--card-bg);
-    padding: 16px;
-    border-radius: 24px;
-    border: 1px solid var(--card-border);
-    margin-bottom: 12px;
-    transition: transform 0.2s;
-}
-
-.app-icon {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-    font-size: 22px;
-    border: 1px solid rgba(56, 189, 248, 0.2);
-}
-
-.app-name { font-weight: 800; font-size: 15px; margin-bottom: 2px; }
-.app-ver { font-size: 12px; color: var(--text-sub); font-weight: 500; }
-
-.dl-link {
-    background: var(--grad);
-    color: #fff;
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 14px;
-    font-size: 13px;
-    font-weight: 800;
-    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
-    transition: all 0.2s;
-    border: none;
-}
-
-.dl-link:active {
-    transform: scale(0.95);
-    box-shadow: none;
-}
-
-.support-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    background: rgba(56, 189, 248, 0.05);
-    border: 2px dashed rgba(56, 189, 248, 0.3);
-    padding: 18px;
-    border-radius: 24px;
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 800;
-    margin-top: 25px;
-    transition: all 0.2s;
-}
-
-.support-btn:active {
-    background: rgba(56, 189, 248, 0.1);
-}
-        .speedtest-box {
-            text-align: center;
-        }
-        .speed-display {
-            margin: 10px 0;
-        }
-        .speed-value {
-            font-size: 42px;
-            font-weight: 900;
-            color: var(--accent);
-            line-height: 1;
-        }
-        .speed-unit {
-            font-size: 14px;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .progress-container {
-            width: 100%;
-            height: 6px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            margin-top: 15px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: var(--grad);
-            transition: width 0.3s ease;
-        }
-
+    /* INSTALL */
+    .device-tabs{display:flex;background:var(--card);padding:5px;border-radius:16px;gap:5px;margin-bottom:14px;border:1px solid var(--border);}
+    .tab-btn{flex:1;padding:11px;border:none;background:transparent;color:var(--sub);border-radius:12px;
+        font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;}
+    .tab-btn.active{background:var(--grad);color:#fff;box-shadow:0 6px 16px -6px rgba(56,189,248,.5);}
+    .app-card{display:flex;align-items:center;gap:13px;background:var(--card);padding:13px;border-radius:16px;
+        border:1px solid var(--border);margin-bottom:10px;}
+    .app-icon{width:46px;height:46px;background:linear-gradient(135deg,rgba(56,189,248,.14),rgba(99,102,241,.14));
+        border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:21px;
+        border:1px solid rgba(56,189,248,.2);flex-shrink:0;}
+    .app-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;}
+    .app-ver{font-size:12px;color:var(--dim);}
+    .dl-link{background:var(--grad);color:#fff;text-decoration:none;padding:9px 16px;border-radius:12px;
+        font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;box-shadow:0 4px 12px -4px rgba(56,189,248,.4);}
+    .dl-link:active{transform:scale(.95);}
+    .support-btn{display:flex;align-items:center;justify-content:center;gap:11px;background:rgba(56,189,248,.06);
+        border:1.5px dashed rgba(56,189,248,.32);padding:16px;border-radius:18px;color:var(--accent);text-decoration:none;
+        font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;margin-top:6px;}
+    .support-btn:active{background:rgba(56,189,248,.12);}
+    .fade-in{animation:fade .5s ease both;}
+    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
     </style>
 </head>
 <body>
 
-    <div class="header">
+    <div class="header fade-in">
         <div class="brand">
-            <h2>Zuu VPN Premium</h2>
-            <div class="status-pill">
-                <i class="fas fa-shield-alt"></i> Защищенное соединение
+            <h2>Zuu VPN</h2>
+            <div class="status-pill"><span class="pulse"></span> Защищённое соединение</div>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i></button>
+    </div>
+
+    <!-- ACCOUNT -->
+    <div class="card fade-in">
+        <div class="acct">
+            <div class="acct-cell wide">
+                <span class="acct-l"><i class="fas fa-user-circle"></i> Аккаунт ID</span>
+                <span class="acct-v" id="u-id">…</span>
+            </div>
+            <div class="acct-cell">
+                <div class="acct-l"><i class="fas fa-wallet"></i> Баланс</div>
+                <div class="acct-v" id="u-bal" style="color:var(--success)">0₽</div>
+            </div>
+            <div class="acct-cell">
+                <div class="acct-l"><i class="fas fa-clock"></i> Подписка</div>
+                <div class="acct-v" id="u-exp" style="font-size:14px">…</div>
             </div>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()">
-            <i class="fas fa-moon" id="theme-icon"></i>
+    </div>
+
+    <!-- IMPORT -->
+    <div id="import-card" class="card fade-in" style="display:none;border:1px solid rgba(16,185,129,.3);background:linear-gradient(180deg,rgba(16,185,129,.07),transparent)">
+        <div class="card-title"><i class="fas fa-bolt" style="color:var(--success)"></i> Быстрая настройка</div>
+        <button class="btn btn-success" onclick="importToHapp()">
+            <i class="fas fa-file-import"></i> Импортировать в Happ
         </button>
     </div>
 
-    <div class="card">
-        <div class="info-row">
-            <span class="label"><i class="fas fa-user-circle"></i> Аккаунт ID</span>
-            <span class="value" id="u-id">...</span>
-        </div>
-        <div class="info-row">
-            <span class="label"><i class="fas fa-credit-card"></i> Баланс</span>
-            <span class="value" id="u-bal" style="color: var(--success);">0₽</span>
-        </div>
-        <div class="info-row">
-            <span class="label"><i class="fas fa-clock"></i> Подписка до</span>
-            <span class="value" id="u-exp">...</span>
-        </div>
-        <div style="text-align: center; margin-top: 10px;">
-             </div>
-    </div> 
-        <div id="import-card" class="card" style="display: none; border: 1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
-    <div class="wheel-title" style="margin-bottom: 12px; text-align: left;">
-        <i class="fas fa-magic" style="color: var(--success);"></i> Быстрая настройка
-    </div>
-    <button class="btn btn-primary" onclick="importToHapp()" style="background: var(--success); box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4);">
-        <i class="fas fa-file-import"></i> ИМПОРТИРОВАТЬ В HAPP PROXY
-    </button>
-</div>
-
-
-
-
-    <div class="card">
-        <div class="wheel-title" style="text-align: left;">
-            <i class="fas fa-map-marker-alt" style="color: var(--accent);"></i> Наши сервера
-        </div>
+    <!-- MAP -->
+    <div class="card fade-in">
+        <div class="card-title"><i class="fas fa-map-marker-alt"></i> Наши сервера</div>
         <div id="map" class="map-container"></div>
+        <div class="servers-meta"><i class="fas fa-circle" style="font-size:7px;color:var(--success)"></i> <b>25+</b> локаций · низкий пинг по всему миру</div>
     </div>
 
-    <div class="card wheel-box">
-        <div class="wheel-title">🎁 Lucky Wheel</div>
-        <div class="wheel-desc">Получи бонус к подписке раз в неделю</div>
-        
-        <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">
-            КРУТИТЬ БОНУС
-        </button>
-        <div id="timer-text">Загрузка...</div>
-    </div>
-<div class="card speedtest-box">
-        <div class="wheel-title" style="text-align: left; margin-bottom: 15px;">
-            <i class="fas fa-gauge-high" style="color: var(--accent);"></i> Тест скорости
+    <!-- LUCKY WHEEL -->
+    <div class="card wheel-card fade-in">
+        <div class="card-title" style="justify-content:center"><span style="font-size:18px">🎁</span> Lucky Wheel</div>
+        <div class="wheel-wrap">
+            <div class="wheel-pointer"></div>
+            <div class="wheel" id="wheel">
+                <div class="wheel-hub">🍀</div>
+            </div>
         </div>
+        <div class="wheel-legend">
+            <span><i class="dot" style="background:#f59e0b"></i>10₽</span>
+            <span><i class="dot" style="background:#10b981"></i>+1 день</span>
+            <span><i class="dot" style="background:#1e2740;border:1px solid var(--border2)"></i>пусто</span>
+        </div>
+        <button class="btn btn-primary" id="spin-btn" onclick="startSpin()">Крутить бонус</button>
+        <div id="timer-text">Загрузка…</div>
+    </div>
+
+    <!-- SPEEDTEST -->
+    <div class="card fade-in" style="text-align:center">
+        <div class="card-title" style="justify-content:flex-start"><i class="fas fa-gauge-high"></i> Тест скорости</div>
         <div class="speed-display">
             <div class="speed-value" id="speed-mbps">0.0</div>
             <div class="speed-unit">Мбит/с</div>
-
         </div>
-        <div class="progress-container">
-            <div class="progress-bar" id="speed-progress"></div>
-        </div>
-        <button class="btn btn-primary" id="test-btn" onclick="runSpeedTest()" style="margin-top: 15px; background: rgba(56, 189, 248, 0.1); color: var(--accent); box-shadow: none; border: 1px solid var(--accent);">
-            НАЧАТЬ ПРОВЕРКУ
-        </button>
+        <div class="progress-container"><div class="progress-bar" id="speed-progress"></div></div>
+        <button class="btn btn-soft" id="test-btn" onclick="runSpeedTest()" style="margin-top:15px">Начать проверку</button>
     </div>
-    <div class="card">
-        <div class="section-title" style="margin-top: 5px;">Установка приложений</div>
+
+    <!-- INSTALL -->
+    <div class="card fade-in">
+        <div class="card-title"><i class="fas fa-download"></i> Установка приложений</div>
         <div class="device-tabs">
             <button class="tab-btn active" onclick="switchDevice('android', this)">Android</button>
             <button class="tab-btn" onclick="switchDevice('ios', this)">iOS</button>
             <button class="tab-btn" onclick="switchDevice('pc', this)">Desktop</button>
         </div>
-
-        <div id="app-list">
-            </div>
-
+        <div id="app-list"></div>
         <a href="https://t.me/zuufeedback_bot" target="_blank" class="support-btn">
             <i class="fas fa-headset"></i> Поддержка: @zuufeedback_bot
         </a>
-
-
-    
-
-
-    
-
     </div>
 
     <script>
-    // --- БЛОК АВТООБНОВЛЕНИЯ ПРИ ЗАПУСКЕ ---
-(function() {
-    const currentUrl = new URL(window.location.href);
-    // Если в ссылке нет параметра 'v', добавляем его и перезагружаем страницу
-    // Это заставит Telegram и браузер обновить кэш
-    if (!currentUrl.searchParams.get('v')) {
-        currentUrl.searchParams.set('v', Date.now()); // Добавляем метку времени
-        window.location.replace(currentUrl.toString());
-    }
-})();
-// ---------------------------------------
+    // --- Кэш-бастер (одноразово при первом открытии) ---
+    (function(){
+        const u = new URL(window.location.href);
+        if(!u.searchParams.get('v')){ u.searchParams.set('v', Date.now()); window.location.replace(u.toString()); }
+    })();
 
+    const tg = window.Telegram.WebApp;
+    tg.expand(); tg.ready();
 
-        const tg = window.Telegram.WebApp;
-tg.expand();
-tg.ready();
-
-const params = new URLSearchParams(window.location.search);
-const userToken = params.get('token'); // Тот самый токен из URL
-const userExp = params.get('exp');     // Дата подписки
-const lastSpin = parseFloat(params.get('ls')) || 0;
-const cooldownSeconds = 518400; 
-
-// Заполнение данных
-document.getElementById('u-id').innerText = params.get('id') || 'Неизвестно';
-document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
-document.getElementById('u-exp').innerText = userExp || 'Нет активной';
-
-// ЛОГИКА КНОПКИ ИМПОРТА
-function setupImportButton() {
-    const importCard = document.getElementById('import-card');
-    // Показываем карточку абсолютно всем
-    importCard.style.display = 'block';
-}
-
-
-function importToHapp() {
-    // 1. Получаем зашифрованную ссылку из параметров URL
     const params = new URLSearchParams(window.location.search);
-    const encryptedLink = params.get('enc_link'); // Берем то, что прислал бот
-    const expDate = document.getElementById('u-exp').innerText;
-    
-    // Проверка подписки
-    if (!encryptedLink || expDate === 'Нет активной' || expDate === '...' || expDate === '') {
-        tg.HapticFeedback.notificationOccurred('error');
-        tg.showAlert("⚠️ Сначала купите подписку в боте, чтобы получить настройки VPN!");
-        return;
-    }
-    
-    // Если бот прислал ссылку вида happ://crypt..., используем её напрямую.
-    // Если прислал просто https (ошибка шифрования), оборачиваем в happ://add/
-    let finalUrl = encryptedLink;
-    if (!finalUrl.startsWith('happ://')) {
-        finalUrl = `happ://add/${finalUrl}`;
-    }
-    
-    tg.HapticFeedback.notificationOccurred('success');
+    const userExp = params.get('exp');
+    const lastSpin = parseFloat(params.get('ls')) || 0;
+    const cooldownSeconds = 518400;
 
-    // Пытаемся открыть
-    tg.openLink(finalUrl, { try_instant_view: false });
-}
+    // Данные аккаунта (из URL, как присылает бот)
+    document.getElementById('u-id').innerText  = params.get('id')  || 'Неизвестно';
+    document.getElementById('u-bal').innerText = (params.get('bal') || '0') + '₽';
+    document.getElementById('u-exp').innerText = userExp || 'Нет активной';
 
-
-
-// Запускаем проверку
-setupImportButton();
-        let map;
-        function initMap() {
-            // Список локаций обновлен в соответствии с вашими серверами
-            const locations = [
-                { name: "Россия 🇷🇺", coords: [55.75, 37.61] },
-                { name: "Германия 🇩🇪", coords: [52.52, 13.40] },
-                { name: "Финляндия 🇫🇮", coords: [60.16, 24.93] },
-                { name: "Польша 🇵🇱", coords: [52.23, 21.01] },
-                { name: "Нидерланды 🇳🇱", coords: [52.36, 4.88] },
-                { name: "Швеция 🇸🇪", coords: [59.32, 18.06] },
-                { name: "Австрия 🇦🇹", coords: [48.20, 16.37] },
-                { name: "Латвия 🇱🇻", coords: [56.94, 24.10] },
-                { name: "Литва 🇱🇹", coords: [54.68, 25.27] },
-                { name: "Великобритания 🇬🇧", coords: [51.50, -0.12] },
-                { name: "Франция 🇫🇷", coords: [48.85, 2.35] },
-                { name: "Швейцария 🇨🇭", coords: [46.94, 7.44] },
-                { name: "Чехия 🇨🇿", coords: [50.07, 14.43] },
-                { name: "Испания 🇪🇸", coords: [40.41, -3.70] },
-                { name: "Турция 🇹🇷", coords: [39.93, 32.85] },
-                { name: "ОАЭ 🇦🇪", coords: [25.20, 55.27] },
-                { name: "Казахстан 🇰🇿", coords: [51.16, 71.47] },
-                { name: "США 🇺🇸", coords: [38.90, -77.03] },
-                { name: "Канада 🇨🇦", coords: [45.42, -75.69] },
-                { name: "Израиль 🇮🇱", coords: [31.76, 35.21] },
-                { name: "Индия 🇮🇳", coords: [28.61, 77.20] },
-                { name: "Бразилия 🇧🇷", coords: [-15.79, -47.88] },
-                { name: "Корея 🇰🇷", coords: [37.56, 126.97] },
-                { name: "Япония 🇯🇵", coords: [35.67, 139.65] },
-                { name: "Австралия 🇦🇺", coords: [-35.28, 149.13] }
-            ];
-
-            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([45, 25], 2);
-            
-            const isLight = document.body.classList.contains('light-mode');
-            const tileStyle = isLight ? 'light_all' : 'dark_all';
-            
-            L.tileLayer(`https://{s}.basemaps.cartocdn.com/${tileStyle}/{z}/{x}/{y}{r}.png`).addTo(map);
-
-            const dotIcon = L.divIcon({
-                className: 'map-dot',
-                html: `<div style="background:#38bdf8;width:8px;height:8px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px #38bdf8;"></div>`,
-                iconSize: [12, 12]
-            });
-
-            locations.forEach(loc => {
-                L.marker(loc.coords, { icon: dotIcon }).addTo(map).bindPopup(`<b>${loc.name}</b>`);
-            });
+    // --- Импорт в Happ (логика сохранена 1-в-1) ---
+    function setupImportButton(){ document.getElementById('import-card').style.display = 'block'; }
+    function importToHapp(){
+        const enc = new URLSearchParams(window.location.search).get('enc_link');
+        const expDate = document.getElementById('u-exp').innerText;
+        if(!enc || expDate === 'Нет активной' || expDate === '…' || expDate === '' || expDate === '...'){
+            tg.HapticFeedback.notificationOccurred('error');
+            tg.showAlert("⚠️ Сначала купите подписку в боте, чтобы получить настройки VPN!");
+            return;
         }
+        let finalUrl = enc;
+        if(!finalUrl.startsWith('happ://')) finalUrl = `happ://add/${finalUrl}`;
+        tg.HapticFeedback.notificationOccurred('success');
+        tg.openLink(finalUrl, { try_instant_view: false });
+    }
+    setupImportButton();
 
-        function updateTimer() {
-            const btn = document.getElementById('spin-btn');
-            const timerText = document.getElementById('timer-text');
-            const now = Math.floor(Date.now() / 1000);
-            const timeLeft = (lastSpin + cooldownSeconds) - now;
+    // --- Карта серверов ---
+    let map;
+    function initMap(){
+        const locations = [
+            {name:"Россия 🇷🇺",coords:[55.75,37.61]},{name:"Германия 🇩🇪",coords:[52.52,13.40]},
+            {name:"Финляндия 🇫🇮",coords:[60.16,24.93]},{name:"Польша 🇵🇱",coords:[52.23,21.01]},
+            {name:"Нидерланды 🇳🇱",coords:[52.36,4.88]},{name:"Швеция 🇸🇪",coords:[59.32,18.06]},
+            {name:"Австрия 🇦🇹",coords:[48.20,16.37]},{name:"Латвия 🇱🇻",coords:[56.94,24.10]},
+            {name:"Литва 🇱🇹",coords:[54.68,25.27]},{name:"Великобритания 🇬🇧",coords:[51.50,-0.12]},
+            {name:"Франция 🇫🇷",coords:[48.85,2.35]},{name:"Швейцария 🇨🇭",coords:[46.94,7.44]},
+            {name:"Чехия 🇨🇿",coords:[50.07,14.43]},{name:"Испания 🇪🇸",coords:[40.41,-3.70]},
+            {name:"Турция 🇹🇷",coords:[39.93,32.85]},{name:"ОАЭ 🇦🇪",coords:[25.20,55.27]},
+            {name:"Казахстан 🇰🇿",coords:[51.16,71.47]},{name:"США 🇺🇸",coords:[38.90,-77.03]},
+            {name:"Канада 🇨🇦",coords:[45.42,-75.69]},{name:"Израиль 🇮🇱",coords:[31.76,35.21]},
+            {name:"Индия 🇮🇳",coords:[28.61,77.20]},{name:"Бразилия 🇧🇷",coords:[-15.79,-47.88]},
+            {name:"Корея 🇰🇷",coords:[37.56,126.97]},{name:"Япония 🇯🇵",coords:[35.67,139.65]},
+            {name:"Австралия 🇦🇺",coords:[-35.28,149.13]}
+        ];
+        map = L.map('map',{zoomControl:false,attributionControl:false}).setView([45,25],2);
+        const isLight = document.body.classList.contains('light-mode');
+        L.tileLayer(`https://{s}.basemaps.cartocdn.com/${isLight?'light_all':'dark_all'}/{z}/{x}/{y}{r}.png`).addTo(map);
+        const dotIcon = L.divIcon({className:'map-dot',
+            html:`<div style="background:#38bdf8;width:9px;height:9px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 10px #38bdf8;"></div>`,
+            iconSize:[13,13]});
+        locations.forEach(loc=>L.marker(loc.coords,{icon:dotIcon}).addTo(map).bindPopup(`<b>${loc.name}</b>`));
+    }
 
-            if (timeLeft > 0) {
-                btn.disabled = true;
-                const d = Math.floor(timeLeft / 86400);
-                const h = Math.floor((timeLeft % 86400) / 3600);
-                btn.innerText = `БЛОКИРОВКА (${d}Д ${h}Ч)`;
-                timerText.innerHTML = `<i class="fas fa-lock"></i> Доступно через ${d}д ${h}ч`;
-                return true;
-            } else {
-                btn.disabled = false;
-                btn.innerText = "ПОЛУЧИТЬ БОНУС";
-                timerText.style.color = "var(--success)";
-                timerText.innerHTML = `<i class="fas fa-check-circle"></i> Можно крутить!`;
-                return false;
-            }
-        }
-
-        function startSpin() {
-            if (updateTimer()) return;
-            const btn = document.getElementById('spin-btn');
+    // --- Таймер колеса ---
+    function updateTimer(){
+        const btn = document.getElementById('spin-btn');
+        const t = document.getElementById('timer-text');
+        const now = Math.floor(Date.now()/1000);
+        const left = (lastSpin + cooldownSeconds) - now;
+        if(left > 0){
             btn.disabled = true;
-            btn.innerText = "КРУТИМ...";
-
-            setTimeout(() => {
-                const rand = Math.random() * 100;
-                let prize = { action: 'wheel_prize', type: 'nothing' };
-                let msg = "😢 Попробуйте в следующий раз!";
-
-                if (rand < 15) {
-                    prize = { action: 'wheel_prize', type: 'money', amount: 10 };
-                    msg = "🎁 Вы выиграли 10₽!";
-                } else if (rand < 30) {
-                    prize = { action: 'wheel_prize', type: 'sub' };
-                    msg = "📅 +1 день к подписке!";
-                }
-
-                tg.showAlert(msg, () => {
-                    tg.sendData(JSON.stringify(prize));
-                    tg.close();
-                });
-            }, 1500);
+            const d = Math.floor(left/86400), h = Math.floor((left%86400)/3600);
+            btn.innerText = `Доступно через ${d}д ${h}ч`;
+            t.innerHTML = `<i class="fas fa-lock"></i> Бонус раз в неделю`;
+            return true;
         }
+        btn.disabled = false; btn.innerText = "Крутить бонус";
+        t.style.color = "var(--success)"; t.innerHTML = `<i class="fas fa-check-circle"></i> Можно крутить!`;
+        return false;
+    }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const icon = document.getElementById('theme-icon');
-            const isLight = document.body.classList.contains('light-mode');
-            icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
-            tg.setHeaderColor(isLight ? '#f8fafc' : '#0f172a');
-            
-            if (map) {
-                map.remove();
-                initMap();
+    // --- Анимированное колесо (приз и sendData сохранены 1-в-1 с ботом) ---
+    function startSpin(){
+        if(updateTimer()) return;
+        const btn = document.getElementById('spin-btn');
+        const wheel = document.getElementById('wheel');
+        btn.disabled = true; btn.innerText = "Крутим…";
+        try{ tg.HapticFeedback.impactOccurred('medium'); }catch(e){}
+
+        const rand = Math.random()*100;
+        let prize, msg, segs;
+        if(rand < 15){ prize={action:'wheel_prize',type:'money',amount:10}; msg="🎁 Вы выиграли 10₽!"; segs=[1,5]; }
+        else if(rand < 30){ prize={action:'wheel_prize',type:'sub'}; msg="📅 +1 день к подписке!"; segs=[3,7]; }
+        else { prize={action:'wheel_prize',type:'nothing'}; msg="😢 Повезёт в следующий раз!"; segs=[0,2,4,6]; }
+        const k = segs[Math.floor(Math.random()*segs.length)];
+        const finalRot = 360*6 + (360 - (k*45 + 22.5));
+
+        wheel.style.transition = 'none'; wheel.style.transform = 'rotate(0deg)';
+        void wheel.offsetWidth;
+        wheel.style.transition = 'transform 4.2s cubic-bezier(0.17,0.67,0.16,1)';
+        wheel.style.transform = `rotate(${finalRot}deg)`;
+
+        setTimeout(()=>{
+            try{ tg.HapticFeedback.notificationOccurred(prize.type==='nothing'?'warning':'success'); }catch(e){}
+            tg.showAlert(msg, ()=>{ tg.sendData(JSON.stringify(prize)); tg.close(); });
+        }, 4400);
+    }
+
+    // --- Тема ---
+    function toggleTheme(){
+        document.body.classList.toggle('light-mode');
+        const isLight = document.body.classList.contains('light-mode');
+        document.getElementById('theme-icon').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+        try{ tg.setHeaderColor(isLight ? '#eef2f8' : '#070b16'); }catch(e){}
+        if(map){ map.remove(); initMap(); }
+    }
+
+    // --- Приложения ---
+    const appData = {
+        android:[
+            {name:'v2rayTun',ver:'Официальный клиент',icon:'fa-robot',link:'https://play.google.com/store/apps/details?id=com.v2raytun.android'},
+            {name:'Happ Proxy',ver:'Лёгкий и быстрый',icon:'fa-bolt',link:'https://play.google.com/store/apps/details?id=com.happproxy'}
+        ],
+        ios:[
+            {name:'Happ Proxy',ver:'App Store (Free)',icon:'fa-mobile-screen-button',link:'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215'},
+            {name:'Streisand',ver:'Премиум',icon:'fa-paper-plane',link:'https://apps.apple.com/app/streisand/id6450534064'}
+        ],
+        pc:[
+            {name:'v2rayN',ver:'Windows x64',icon:'fa-desktop',link:'https://github.com/2dust/v2rayN/releases'}
+        ]
+    };
+    function renderApps(p){
+        const c = document.getElementById('app-list'); c.innerHTML = '';
+        appData[p].forEach(a=>{
+            c.innerHTML += `<div class="app-card"><div class="app-icon"><i class="fas ${a.icon}"></i></div>
+                <div style="flex:1"><div class="app-name">${a.name}</div><div class="app-ver">${a.ver}</div></div>
+                <a href="${a.link}" target="_blank" class="dl-link">Скачать</a></div>`;
+        });
+    }
+    function switchDevice(p, btn){
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active'); renderApps(p);
+    }
+
+    // --- Спидтест (логика сохранена) ---
+    async function runSpeedTest(){
+        const btn = document.getElementById('test-btn');
+        const val = document.getElementById('speed-mbps');
+        const bar = document.getElementById('speed-progress');
+        btn.disabled = true; btn.innerText = "Замеряем…"; val.innerText = "0.0"; bar.style.width = "0%";
+        const testFile = "https://upload.wikimedia.org/wikipedia/commons/3/3a/Russia_Relief_Location_map.jpg?cache=" + Math.random();
+        const fileBits = 5*1024*1024*8;
+        const start = Date.now();
+        try{
+            const resp = await fetch(testFile);
+            const reader = resp.body.getReader();
+            let loaded = 0;
+            while(true){
+                const {done,value} = await reader.read();
+                if(done) break;
+                loaded += value.length;
+                bar.style.width = Math.min((loaded/(5*1024*1024))*100,100) + "%";
             }
-        }
+            const dur = (Date.now()-start)/1000;
+            val.innerText = (fileBits/dur/1000000).toFixed(1);
+            btn.innerText = "Повторить тест";
+        }catch(e){
+            tg.showAlert("Ошибка теста. Проверьте соединение.");
+            btn.innerText = "Ошибка";
+        }finally{ btn.disabled = false; }
+    }
 
-        updateTimer();
-        setTimeout(initMap, 200);
-        if (tg.colorScheme === 'light') toggleTheme();
-        const appData = {
-    android: [
-        { name: 'v2rayTun', ver: 'Официальный клиент', icon: 'fa-robot', link: 'https://play.google.com/store/apps/details?id=com.v2raytun.android' },
-        { name: 'Happ Proxy', ver: 'Легкий и быстрый', icon: 'fa-bolt', link: 'https://play.google.com/store/apps/details?id=com.happproxy' }
-    ],
-    ios: [
-        { name: 'Happ Proxy', ver: 'App Store (Free)', icon: 'fa-apple', link: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215' },
-        { name: 'Streisand', ver: 'Платный (Premium)', icon: 'fa-paper-plane', link: 'https://apps.apple.com/app/streisand/id6450534064' }
-    ],
-    pc: [
-        { name: 'v2rayN', ver: 'Windows x64', icon: 'fa-desktop', link: 'https://github.com/2dust/v2rayN/releases' }
-    ]
-};
-// Функция для отрисовки списка приложений
-function renderApps(platform) {
-    const listContainer = document.getElementById('app-list');
-    listContainer.innerHTML = ''; // Очищаем список
-
-    appData[platform].forEach(app => {
-        const appHtml = `
-            <div class="app-card">
-                <div class="app-icon">
-                    <i class="fas ${app.icon}"></i>
-                </div>
-                <div style="flex: 1;">
-                    <div class="app-name">${app.name}</div>
-                    <div class="app-ver">${app.ver}</div>
-                </div>
-                <a href="${app.link}" target="_blank" class="dl-link">Скачать</a>
-            </div>
-        `;
-        listContainer.innerHTML += appHtml;
-    });
-}
-
-// Функция переключения табов
-function switchDevice(platform, btn) {
-    // Убираем активный класс у всех кнопок
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    // Добавляем нажатой кнопке
-    btn.classList.add('active');
-    // Обновляем список приложений
-    renderApps(platform);
-}
-
-// Инициализация (чтобы при загрузке сразу показывало Android)
-window.onload = () => {
+    // --- Инициализация ---
+    updateTimer();
+    setTimeout(initMap, 200);
     renderApps('android');
-};
-        async function runSpeedTest() {
-            const btn = document.getElementById('test-btn');
-            const speedText = document.getElementById('speed-mbps');
-            const progressBar = document.getElementById('speed-progress');
-            
-            btn.disabled = true;
-            btn.innerText = "ЗАМЕРЯЕМ...";
-            speedText.innerText = "0.0";
-            progressBar.style.width = "0%";
-
-            // Ссылка на тестовый файл (картинка 5МБ для теста). 
-            // В идеале замените на файл на вашем сервере VPN для точности
-            const testFile = "https://upload.wikimedia.org/wikipedia/commons/3/3a/Russia_Relief_Location_map.jpg?cache=" + Math.random();
-            const fileSize = 5 * 1024 * 1024 * 8; // Примерный размер в битах
-
-            const startTime = new Date().getTime();
-            
-            try {
-                const response = await fetch(testFile);
-                const reader = response.body.getReader();
-                let loaded = 0;
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    loaded += value.length;
-                    const percent = (loaded / (5 * 1024 * 1024)) * 100;
-                    progressBar.style.width = Math.min(percent, 100) + "%";
-                }
-
-                const endTime = new Date().getTime();
-                const duration = (endTime - startTime) / 1000;
-                const speedMbps = (fileSize / duration / 1000000).toFixed(1);
-
-                speedText.innerText = speedMbps;
-                btn.innerText = "ПОВТОРИТЬ ТЕСТ";
-            } catch (e) {
-                tg.showAlert("Ошибка теста. Проверьте соединение.");
-                btn.innerText = "ОШИБКА";
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
+    if(tg.colorScheme === 'light') toggleTheme();
     </script>
 </body>
 </html>
